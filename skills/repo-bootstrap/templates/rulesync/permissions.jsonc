@@ -1,0 +1,103 @@
+// Template: layered agent permissions in rulesync source format (.rulesync/permissions.jsonc).
+// Signal: always. Fill <placeholders> with this repo's package manager, deploy CLIs and secrets CLI;
+// delete lines for tools the repo does not use. Layers: deny → ask → allow; hooks are the second
+// layer (they catch command shapes globs miss). Remove this header in the generated file.
+{
+  "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/permissions-schema.json",
+  "permission": {
+    "bash": {
+      // --- allow: read-only and verification commands, no prompt ---
+      "<pm> test *": "allow",
+      "<pm> run lint *": "allow",
+      "<pm> run typecheck *": "allow",
+      "gh pr view *": "allow",
+      "gh pr list *": "allow",
+      "gh pr checks *": "allow",
+      "gh pr diff *": "allow",
+      "gh issue view *": "allow",
+      "gh issue list *": "allow",
+      "gh run list *": "allow",
+      "gh run view *": "allow",
+      "gh repo view *": "allow",
+      // No blanket allow for `gh api`: any -f/-F switches it from GET to POST.
+      "gh api * --method GET *": "allow",
+
+      // --- ask: publishing needs explicit authorization; destructive or outward actions ---
+      "gh issue comment *": "ask",
+      "gh pr comment *": "ask",
+      "gh pr review *": "ask",
+      "gh pr merge *": "ask",
+      "gh repo delete *": "ask",
+      "gh release delete *": "ask",
+      "gh secret *": "ask",
+      "gh workflow run *": "ask",
+      "rm -rf *": "ask",
+      "rm -r *": "ask",
+      "git push --force*": "ask",
+      "git push -f*": "ask",
+      "git push * --force*": "ask",
+      "git reset --hard*": "ask",
+      "git clean *": "ask",
+      "git stash drop*": "ask",
+      "git stash clear*": "ask",
+      "git stash pop*": "ask",
+      "git branch -D *": "ask",
+      "git rebase *": "ask",
+      "<deploy-cli> deploy*": "ask",
+      "<secrets-cli> *": "ask",
+      "sudo *": "ask",
+      "pkill *": "ask",
+      "killall *": "ask",
+      "kill -9 *": "ask",
+      "npm publish*": "ask",
+      "<pm> publish*": "ask",
+
+      // --- deny: never, even with authorization ---
+      // Approving a PR is always a human action (also enforced by the outward-writes hook).
+      "gh pr review * --approve*": "deny",
+      "gh pr review --approve*": "deny",
+      "gh pr review * -a *": "deny",
+      "gh pr review -a *": "deny",
+      "gh pr review * -a": "deny",
+      // Mutating gh api calls bypass the per-command ask prompt.
+      "gh api * -f *": "deny",
+      "gh api * -F *": "deny",
+      "gh api * --raw-field *": "deny",
+      "gh api * --field *": "deny",
+      "gh api * --input *": "deny",
+      "gh api * --method POST *": "deny",
+      "gh api * --method PUT *": "deny",
+      "gh api * --method PATCH *": "deny",
+      "gh api * --method DELETE *": "deny",
+      "gh api * -X POST *": "deny",
+      "gh api * -X PUT *": "deny",
+      "gh api * -X PATCH *": "deny",
+      "gh api * -X DELETE *": "deny",
+      // Secrets files are never read through the shell.
+      ". .env*": "deny",
+      "source .env*": "deny",
+      "cat .env*": "deny",
+      "cat ./.env*": "deny",
+      "grep*.env*": "deny",
+      "head*.env*": "deny",
+      "tail*.env*": "deny",
+      "sed*.env*": "deny",
+      "awk*.env*": "deny",
+      "less .env*": "deny",
+      "more .env*": "deny",
+      "strings .env*": "deny",
+      "xxd .env*": "deny",
+      "od*.env*": "deny",
+      "nl .env*": "deny"
+    },
+    "read": {
+      "*.key": "deny",
+      "*.pem": "deny",
+      ".env": "deny",
+      ".env.*": "deny",
+      "node_modules/": "deny",
+      "dist/": "deny",
+      "coverage/": "deny"
+    }
+  }
+}

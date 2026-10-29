@@ -1,0 +1,16 @@
+{
+  "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/mcp-schema.json",
+  "mcpServers": {
+    "<remote-service>": {
+      "type": "http",
+      "url": "<official remote MCP URL from the vendor docs>"
+    },
+    "<local-service>": {
+      "command": "npx",
+      "args": ["-y", "<official-mcp-package>@<exact version published >=5 days ago>"],
+      "env": {
+        "<SERVICE_API_KEY>": "${<SERVICE_API_KEY>}"
+      }
+    }
+  }
+}
