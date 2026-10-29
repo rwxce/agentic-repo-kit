@@ -1,0 +1,24 @@
+# WHAT: CODEOWNERS for the sensitive areas. Keep it in sync with SENSITIVE_* in review-routing.mjs:
+#   the same paths force the flow-sensitive lane.
+# REPO SIGNAL: any path where a bad change is expensive (auth, billing, data, CI, security, legal).
+# CONFIGURE: replace owners; copy to .github/CODEOWNERS. It is advisory until branch protection /
+#   rulesets enable "Require review from Code Owners" (private repos on free plans may not support it).
+
+# Automation and review policy
+/.github/                     @<owner-1> @<owner-2>
+/.rulesync/                   @<owner-1> @<owner-2>
+/package.json                 @<owner-1> @<owner-2>
+/pnpm-lock.yaml               @<owner-1> @<owner-2>
+
+# Data and shared backend
+/<migrations-dir>/            @<owner-1> @<owner-2>
+/<src/db>/                    @<owner-1> @<owner-2>
+/<src/services>/              @<owner-1> @<owner-2>
+
+# Auth, security, public APIs, routing, billing, compliance
+/<src/auth>/                  @<owner-1> @<owner-2>
+/<src/api>/                   @<owner-1> @<owner-2>
+/<middleware-file>            @<owner-1> @<owner-2>
+/<src/routes.ts>              @<owner-1> @<owner-2>
+/<billing-dir>/               @<owner-1> @<owner-2>
+/<compliance-dir>/            @<owner-1> @<owner-2>
