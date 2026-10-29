@@ -1,0 +1,11 @@
+{
+  "name": "agentic-repo-kit",
+  "version": "0.1.0",
+  "description": "Analyze any repo and set up a production-grade AI agent workflow: agents, skills, hooks, architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. Asks first, proposes with evidence, generates only after your go.",
+  "author": {
+    "name": "rwxce"
+  },
+  "homepage": "https://github.com/rwxce/agentic-repo-kit",
+  "repository": "https://github.com/rwxce/agentic-repo-kit",
+  "keywords": ["bootstrap", "agents", "skills", "hooks", "rulesync", "guardrails", "architecture-tests"]
+}

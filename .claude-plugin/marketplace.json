@@ -1,0 +1,14 @@
+{
+  "name": "agentic-repo-kit",
+  "description": "Repo bootstrap for AI coding agents: analysis, proposal and generation of agents, skills, hooks, guardrails and CI.",
+  "owner": {
+    "name": "rwxce"
+  },
+  "plugins": [
+    {
+      "name": "agentic-repo-kit",
+      "source": "./",
+      "description": "The /repo-bootstrap skill and its templates."
+    }
+  ]
+}
