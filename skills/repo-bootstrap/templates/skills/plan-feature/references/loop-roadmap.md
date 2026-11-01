@@ -60,8 +60,8 @@ After the "go":
 2. Pick the next unblocked item (or launch the next parallel wave in the background).
 3. Delegate with a Handoff brief (`handoff-brief.md`) giving the absolute worktree path.
 4. When it returns: `<lint>`, `<typecheck>` (run any codegen it needs first), `<test>`.
-5. UI items: see it in the running app (`<dev server command>` + a test login) with shots at 375/768/1440, en/es,
-   light/dark. **An item with UI is not done without shots.** One dev server at a time; stop it.
+5. UI items: see it in the running app (`<dev server command>` + a test login) with shots at each breakpoint,
+   locale and theme the repo supports. **An item with UI is not done without shots.** One dev server at a time; stop it.
 6. Flow-sensitive items: `<diff reviewer>` on the strongest model in a fresh context; fix
    material findings.
 7. Commit per logical step and push; open the PR (lane marked, shots attached or linked).
