@@ -29,9 +29,9 @@ Pick the size from the request plus a quick look (`<code-graph query>` or `rg`) 
 
 | Size | When | Protocol |
 |---|---|---|
-| **Big** | Touches any flow-sensitive area (<list from the root rule's review policy: data/schema, shared backend, integrations, auth, billing, security, routing, compliance, external effects, dependencies>), **or** spans more than one domain, **or** adds new public entry points | Steps 1-9, sweep with 2-3 parallel subagents, `plan-reviewer` at step 6. Budget ~200-250k tokens |
-| **Normal** | Changes contracts or data that other code reads | Steps 1-5, 7-9 with one sweep subagent. Budget ~100-120k tokens |
-| **Small** | Everything else | Straight to the plan (steps 5, 8, 9 only; no sweep) |
+| **Big** | Touches any flow-sensitive area (<list from the root rule's review policy: data/schema, shared backend, integrations, auth, billing, security, routing, compliance, external effects, dependencies>), **or** spans more than one domain, **or** adds new public entry points | Steps 1-11, sweep with 2-3 parallel subagents, `plan-reviewer` at step 6. Budget ~200-250k tokens |
+| **Normal** | Changes contracts or data that other code reads | Steps 1-5, 7-11 with one sweep subagent. Budget ~100-120k tokens |
+| **Small** | Everything else | Straight to the plan (steps 5, 8-11 only; no sweep) |
 
 - When in doubt between two sizes, **pick the bigger one** — a hole in auth or billing costs more
   than 100k tokens.
@@ -122,7 +122,25 @@ Append the brief each implementer subagent will receive (`references/handoff-bri
 files and graph results, decisions taken, invariants, do-not-touch list, verification. The
 implementer **stops and reports back if the plan does not fit the code** instead of improvising.
 
-Then present the plan and wait for the user's explicit "go".
+## Step 10 — loop roadmap (every size)
+
+Turn the plan into a roadmap the loop can execute without the user: one row per item (id,
+content, domain agent, lane, branch/base, depends on, done criterion, verification, stops the
+loop?). Small work gets a 1-2 row roadmap in the same format. Template and loop protocol:
+`references/loop-roadmap.md`.
+
+## Step 11 — pre-loop questions (every size, mandatory before "go")
+
+Walk each roadmap item and list everything that would stop the loop: product or copy decisions,
+rate-limit rows, compliance, dashboard or secret work only the user can do, missing tools or MCPs
+pointing at the wrong environment, dev server mode, push/PR permissions, checks only a human can
+do (real browsers, devices). Ask them with the question tool (max 4 per round, as many rounds as
+needed), each with a recommendation that becomes the default. Unanswered → "default applied,
+decide at the end" in the roadmap. A question with no reasonable default blocks only its item.
+No step 11, no "go". End the plan with a **Pending for you (outside code)** list.
+
+Then present the plan and wait for the user's explicit "go". After the "go", start the loop as
+`references/loop-roadmap.md` describes.
 
 ## Clarifications
 
@@ -136,4 +154,5 @@ single line `Already approved: …`. Exempt from the chat length limit.
 
 The plan, in the conversation (or the plan file in plan mode): size line → PR map (if fresh
 workspace) → files / approach / tradeoffs → Docs checked → side-effect registry walk → Rate limit
-block → compliance → Invariants → Handoff brief → Clarifications (if any).
+block → compliance → Invariants → Handoff brief → Loop roadmap → Pre-loop questions (with the
+defaults) → Pending for you (outside code) → Clarifications (if any).

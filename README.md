@@ -27,14 +27,7 @@ CI) that make the rules impossible to forget.
 
 ## Install
 
-As a plugin, from inside Claude Code:
-
-```bash
-claude plugin marketplace add rwxce/agentic-repo-kit
-claude plugin install agentic-repo-kit@agentic-repo-kit
-```
-
-Or copy the skill into a project or into your user skills:
+Copy the skill into a project or into your user skills:
 
 ```bash
 git clone https://github.com/rwxce/agentic-repo-kit.git
@@ -121,7 +114,6 @@ The full catalog, with the failure behind each item, is in
 ## Repository layout
 
 ```
-.claude-plugin/            plugin.json + marketplace.json
 skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
   references/              loaded on demand: options menu, discovery lenses, code style,

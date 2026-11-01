@@ -8,7 +8,7 @@ and skill files). Fill every `<placeholder>`; delete optional sections whose sig
 |---|---|---|
 | `rules/` | `root.md` — root rules (plan + go, Clarifications, docs first, verification, git/review policy, agents roles, trim with audit…) | `.rulesync/rules/` or `CLAUDE.md`/`AGENTS.md` |
 | `agents/` | `implementer.md`, `diff-reviewer.md`, `plan-reviewer.md`, `api-reference.md` | `.rulesync/subagents/` or `.claude/agents/` |
-| `skills/` | `plan-feature/` (+ sweep and handoff briefs), `verify-integration/`, `reflect/`, `debugging/`, `pr-review/` | `.rulesync/skills/` or `.claude/skills/` |
+| `skills/` | `plan-feature/` (+ sweep and handoff briefs, loop roadmap), `verify-integration/`, `reflect/`, `debugging/`, `pr-review/` | `.rulesync/skills/` or `.claude/skills/` |
 | `registries/` | `side-effect-registry.md`, `blueprint.md`, `environment-variables.md` | `docs/` |
 | `rulesync/` | `rulesync.jsonc`, `permissions.jsonc`, `mcp.json` | repo root and `.rulesync/` |
 | `hooks/` | 11 hook scripts + `node:test` suites, `hooks.rulesync.json`, `settings.hooks.json`, README | `scripts/` + hook wiring |

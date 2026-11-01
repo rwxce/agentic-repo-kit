@@ -260,3 +260,9 @@ specific results.
 - Avoid fabricating data (ratings, non-existent file references). If unsure, ask or omit.
 - When a task is done, end with at most 3 concrete next steps, one line each, only if real ones
   exist (no filler). They count inside the 3-5 lines.
+- **Pending for you (outside code).** Every implementation (a fix, a PR, a loop run) ends its
+  final message with this block whenever something exists: actions only the user can take
+  (dashboards, browsers, secrets, merges, publishing), decisions taken with a default that they
+  should confirm or change, and things they need to know (risks, shared environments touched,
+  data left behind). One line each; outside the length limit. Omit it only when there is
+  truly nothing.
