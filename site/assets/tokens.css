@@ -1,0 +1,38 @@
+:root {
+  --lp-field: #1622ee;
+  --lp-field-hot: #2a36ff;
+  --lp-on-field-accent: #ffe27a;
+  --lp-bg: #fff;
+  --lp-soft: #f4f5ff;
+  --lp-card: #fff;
+  --lp-head: #0e1130;
+  --lp-text: #0a0b10;
+  --lp-body: #4a4e6b;
+  --lp-muted: #5a5e7a;
+  --lp-accent: #1622ee;
+  --lp-line: rgba(22,34,238,0.12);
+  --lp-line-soft: rgba(14,17,48,0.08);
+  --lp-line-ink: rgba(10,11,16,0.12);
+  --lp-nav-bg: rgba(255,255,255,0.9);
+  --lp-nav-text: #3a3e5c;
+  --lp-seg-knob: #0a0b10;
+  --lp-shadow-cta: 0 18px 40px -18px rgba(22,34,238,0.6);
+  --lp-shadow-form: 0 20px 50px -18px rgba(22,34,238,0.55);
+  --lp-shadow-nav: 0 12px 30px -20px rgba(22,34,238,0.4);
+  --lp-icon-btn: oklch(0.45 0 0);
+  --lp-icon-btn-hover-bg: oklch(0.96 0 0);
+  --lp-icon-btn-hover: oklch(0.09 0 0);
+  --lp-copied: #22c55e;
+  --lp-select: oklch(0.55 0.22 255);
+  --radius-md: 8px;
+  --font-sans: "Satoshi",system-ui,sans-serif;
+  --font-display: "Satoshi",ui-sans-serif,system-ui,sans-serif;
+  --font-mono: "Geist Mono",ui-monospace,monospace;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("fonts/mono-500.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}

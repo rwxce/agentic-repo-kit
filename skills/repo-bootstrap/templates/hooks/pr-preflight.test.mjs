@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { heavyFileReason, isRealEnvFile, envIgnoreWeakened, findProblems } from './pr-preflight.mjs'
-import { makeRepo, put, runScript } from './_helpers.mjs'
+import { heavyFileReason, isRealEnvFile, envIgnoreWeakened, findProblems, isSensitivePath, reviewSealNotice, CONFIG } from './pr-preflight.mjs'
+import { reviewSealStatus, writeReviewSeal } from './review-seal.mjs'
+import { git, makeRepo, put, runScript } from './_helpers.mjs'
 
 describe('pr-preflight: heavyFileReason', () => {
   const MB = 1024 * 1024
@@ -89,5 +90,46 @@ describe('pr-preflight: CLI', () => {
   it('--strict is still 0 on a clean tree', () => {
     const repo = makeRepo({ 'a.js': 'a' })
     assert.equal(runScript('pr-preflight.mjs', { args: ['--strict'], env: { CLAUDE_PROJECT_DIR: repo } }).status, 0)
+  })
+})
+
+describe('pr-preflight: independent review seal notice (advisory)', () => {
+  const featureRepo = (files) => {
+    const repo = makeRepo({ '.gitignore': '.context/\n', 'a.js': 'a' }, 'main')
+    git(repo, 'checkout', '-qb', 'feat/x')
+    put(repo, files)
+    return repo
+  }
+
+  it('classifies sensitive paths with neutral defaults', () => {
+    for (const f of ['db/migrations/001.sql', 'src/auth/session.ts', 'app/api/orders/route.ts', '.github/workflows/ci.yml', 'package.json', 'pnpm-lock.yaml']) {
+      assert.equal(isSensitivePath(f), true, f)
+    }
+    for (const f of ['src/components/Button.tsx', 'docs/readme.md', 'src/authors.ts']) assert.equal(isSensitivePath(f), false, f)
+  })
+
+  it('warns on a sensitive diff without a seal, silent once sealed', () => {
+    const repo = featureRepo({ 'src/auth/login.ts': 'x' })
+    assert.match(reviewSealNotice(repo, CONFIG, {}, reviewSealStatus), /Independent review missing/)
+    writeReviewSeal(repo, 'feat/x')
+    assert.equal(reviewSealNotice(repo, CONFIG, {}, reviewSealStatus), null)
+    put(repo, { 'src/auth/login.ts': 'changed' })
+    assert.match(reviewSealNotice(repo, CONFIG, {}, reviewSealStatus), /Independent review stale/)
+  })
+
+  it('silent for non-sensitive diffs, without the seal script, or with an empty list', () => {
+    assert.equal(reviewSealNotice(featureRepo({ 'src/ui/a.ts': 'x' }), CONFIG, {}, reviewSealStatus), null)
+    const repo = featureRepo({ 'src/auth/login.ts': 'x' })
+    assert.equal(reviewSealNotice(repo, CONFIG, {}, null), null)
+    assert.equal(reviewSealNotice(repo, { ...CONFIG, sensitivePaths: [] }, {}, reviewSealStatus), null)
+  })
+
+  it('CLI prints the notice in advisory mode only', () => {
+    const repo = featureRepo({ 'src/auth/login.ts': 'x' })
+    const env = { CLAUDE_PROJECT_DIR: repo }
+    assert.match(runScript('pr-preflight.mjs', { env, cwd: repo }).stdout, /Independent review missing/)
+    const strict = runScript('pr-preflight.mjs', { args: ['--strict'], env, cwd: repo })
+    assert.equal(strict.status, 0)
+    assert.doesNotMatch(strict.stdout, /Independent review/)
   })
 })

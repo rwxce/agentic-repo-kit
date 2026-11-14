@@ -59,3 +59,16 @@ The PR URL, or the PR of the current branch (`<host CLI> pr view --json number,u
 - **Recommendation:** merge / merge after fixes / do not merge, with the one deciding reason.
 
 If the PR holds up, say so in one line. Do not pad the list.
+
+## Reviewer type and seal
+
+The review's first line states who reviewed:
+- `Type: independent (fresh context, diff <seal hash>)` — a context that did not write the code: a
+  new subagent, or another agent, given the diff, not the author's conclusions. Only this counts as
+  the independent review a flow-sensitive PR needs.
+- `Type: self-check` — the session that wrote the code. A second pass by the same agent is still a
+  self-check.
+
+An independent reviewer ends by running `node scripts/review-seal.mjs write <base>`; the seal goes
+stale as soon as the diff changes, and the PR-creation command and the PR preflight warn on a
+flow-sensitive diff without a fresh seal. A self-check never writes it.

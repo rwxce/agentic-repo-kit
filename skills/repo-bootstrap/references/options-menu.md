@@ -18,16 +18,21 @@ light scan ("Recommended because …"). Never pre-decide silently. Two rounds of
 - *Existing project* — source code to analyse; every proposal cites `file:line`.
 
 **3. Families** (multi-select; default = all that have a signal)
-- *Root rules* — `CLAUDE.md`/`AGENTS.md`: plan-before-code, docs first, verification, git policy.
+- *Root rules* — `CLAUDE.md`/`AGENTS.md`: plan-before-code, decision log, evidence and spikes, docs first,
+  verification, git policy.
 - *Agents* — orchestrator/implementer/reviewer roles, per-domain implementers with Build rules.
-- *Skills* — plan-feature, verify-integration, reflect, debugging, pr-review, and repo-specific ones.
-- *Hooks* — deterministic guards: dangerous commands, outward writes, intent routing, stop checks.
+- *Skills* — plan-feature, verify-integration, reflect, debugging, pr-review, pr-scope (+ `pr-triage`
+  command), interview-me, and repo-specific ones.
+- *Hooks* — deterministic guards: dangerous commands, outward writes, protected branches, intent
+  routing, session hand off, index refresh, stop checks.
 - *Architecture tests* — tests that fail when structure drifts (registry ↔ filesystem parity…).
 - *Custom lint* — layer boundaries, SDK gateways, required tests, no swallowed errors.
-- *CI* — config-sync check, lint/typecheck/tests, parity checks, branch policy, review routing.
-- *Automations* — workspace setup, release promotion, contract issues, vendored-skill updates.
+- *CI* — config-sync check, lint/typecheck/tests, parity checks, branch policy, review routing, plan-folder
+  gate, contract issues, post-deploy smoke.
+- *Automations* — workspace setup, release promotion, contract issues, vendored-skill updates, skill lint
+  and routing pack, dependency-family check.
 - *Permissions* — deny / ask / allow layers for shell, secrets and outward actions.
-- *Registries* — side-effect registry, blueprint (inventory), environment variables.
+- *Registries* — side-effect registry, blueprint (inventory), environment variables, use-case matrix.
 - *MCP servers* — official MCPs for the services the repo uses (proposed, never auto-installed).
 
 ## Round 2

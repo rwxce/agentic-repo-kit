@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { detectFeatureIntent, featureContext, CONFIG } from './detect-feature-intent.mjs'
+import { detectFeatureIntent, featureContext, CONFIG, PATTERNS, ENABLED_LANGUAGES } from './detect-feature-intent.mjs'
 import { runScript } from './_helpers.mjs'
 
 describe('detect-feature-intent', () => {
@@ -10,25 +10,28 @@ describe('detect-feature-intent', () => {
     'We need a new feature for billing',
     'we need to build a flow for onboarding',
     'Build a feature that lists orders',
-    'vull afegir una nova funcionalitat de notificacions',
-    'vull que els usuaris puguin exportar',
-    'quiero añadir una nueva funcionalidad de pagos',
-    'quiero que los usuarios puedan invitar',
-    'nueva funcionalidad: exportar a CSV',
   ]
   const misses = [
     'fix the login bug',
-    'arregla el botó de login',
+    'quiero añadir una nueva funcionalidad de pagos', // Spanish is opt-in, off by default
     'why does this feature flag exist?',
     'rename the variable',
     'what does this function do',
-    'ajusta el copy del hero',
+    'tweak the hero copy',
     '<task-notification>I want to add a new feature</task-notification>',
     '[SYSTEM NOTIFICATION] new feature',
     '',
   ]
   for (const p of hits) it(`detects: ${p}`, () => assert.ok(detectFeatureIntent(p)))
   for (const p of misses) it(`ignores: ${JSON.stringify(p)}`, () => assert.equal(detectFeatureIntent(p), null))
+
+  it('English only by default; Spanish works when its patterns are passed', () => {
+    assert.deepEqual(ENABLED_LANGUAGES, ['en'])
+    for (const p of ['quiero añadir una nueva funcionalidad de pagos', 'quiero que los usuarios puedan invitar', 'nueva funcionalidad: exportar a CSV']) {
+      assert.ok(detectFeatureIntent(p, PATTERNS.es), p)
+    }
+    assert.equal(detectFeatureIntent('arregla el botón de login', PATTERNS.es), null)
+  })
 
   it('ignores non-strings', () => assert.equal(detectFeatureIntent(undefined), null))
 

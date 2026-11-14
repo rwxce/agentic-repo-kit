@@ -4,7 +4,12 @@
     "sessionStart": [
       {
         "type": "command",
-        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/session-start-status.mjs\"",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/session-start-status.mjs",
+        "timeout": 10
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/load-handoff.mjs",
         "timeout": 10
       }
     ],
@@ -15,6 +20,12 @@
         "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/block-outward-writes.mjs\"",
         "timeout": 10,
         "failClosed": true
+      },
+      {
+        "type": "command",
+        "matcher": "Bash",
+        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/protect-branches.mjs\"",
+        "timeout": 10
       },
       {
         "type": "command",
@@ -44,28 +55,45 @@
     "stop": [
       {
         "type": "command",
-        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/lint-if-changed.mjs\"",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/lint-if-changed.mjs",
         "timeout": 60
       },
       {
         "type": "command",
-        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/compliance-tripwire.mjs\"",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/compliance-tripwire.mjs",
         "timeout": 30
       },
       {
         "type": "command",
-        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/branch-policy.mjs\"",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/branch-policy.mjs",
         "timeout": 30
       },
       {
         "type": "command",
-        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/pr-preflight.mjs\"",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/pr-preflight.mjs",
         "timeout": 30
       },
       {
         "type": "command",
-        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/check-env-docs.mjs\"",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/check-env-docs.mjs",
         "timeout": 30
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/index-refresh.mjs",
+        "timeout": 120
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/save-handoff.mjs",
+        "timeout": 10
+      }
+    ],
+    "preCompact": [
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/save-handoff.mjs",
+        "timeout": 10
       }
     ]
   }

@@ -8,6 +8,9 @@ with WHAT / REPO SIGNAL / CONFIGURE. Copy only what the repo's signals justify.
 | `ci.yml` | `.github/workflows/ci.yml` | Merging code that fails lint/types/tests, or drifted generated AI config. | Always. `run --if-present` makes missing scripts a no-op. |
 | `branch-policy-guard.yml` | `.github/workflows/` | PRs into the wrong protected branch. | A dev -> stage -> prod flow. |
 | `migration-contract-gate.yml` | `.github/workflows/` | Expand/migrate/contract with a forgotten "contract" step. | Migration registry file + a deprecation process. |
+| `contract-issue.yml` | `.github/workflows/` | After merge, a migration whose destructive "contract" step nobody tracks (the safety net when the pre-merge gate was bypassed). | Same as above; pair the two. |
+| `plan-folder/` (`check-plan-close.mjs` + test, `plan-folder-gate.yml`, `plan-folder-stale.yml`) | script to `scripts/`, workflows to `.github/workflows/` | A finished plan folder lingering as stale "truth", a folder deleted half-way (decision log lost), or a `Closes-plan` marker with a typo. The stale check opens an issue for folders untouched for N days; it never deletes. | Multi-PR initiatives with a plan folder and decision log (plan-feature `references/plan-folder.md`). |
+| `smoke-deploy.yml` | `.github/workflows/` | A deploy that built fine but fails at runtime, shipped without anyone hitting it. Runs `automations/smoke-deploy.mjs` on a URL. | Deploys outside CI (host Git integration), so CI never learns the URL. |
 | `review-routing/` | script to `.github/scripts/`, workflow to `.github/workflows/` | Risky changes approved on a self-declared "trivial". | Small team, agent-authored PRs. |
 | `pull_request_template.md` | `.github/` | Missing evidence, unlabelled lane. Machine-read by review-routing. | Same. |
 | `CODEOWNERS.example` | `.github/CODEOWNERS` | Sensitive paths changed without the right eyes. | Same. |

@@ -1,0 +1,26 @@
+{
+  "$comment": "Routing case pack. featureIntent: prompts run through the feature-intent hook (detect-feature-intent.mjs, which routes to plan-feature). skills: each own skill's description must name its triggers, so the model can route to it. Static only: it does not grade model judgment. knownFalsePositive documents a miss accepted today without failing the suite; when the regex is fixed the case fails and moves to the active list. Add one case per routing miss you observe.",
+  "featureIntent": [
+    { "prompt": "I want to add a referral program", "expect": true },
+    { "prompt": "Add a new feature to export invoices as CSV", "expect": true },
+    { "prompt": "Build a new feature for order refunds", "expect": true },
+    { "prompt": "I want users to be able to pause their subscription", "expect": true },
+    { "prompt": "We need a new screen for team billing", "expect": true },
+    { "prompt": "fix the broken checkout redirect", "expect": false },
+    { "prompt": "how does the invoice feature work?", "expect": false },
+    { "prompt": "write the plan", "expect": false },
+    { "prompt": "change the hero copy", "expect": false },
+    { "prompt": "rename the orders table column", "expect": false },
+    { "prompt": "I want to add a test for the webhook handler", "expect": false, "knownFalsePositive": true },
+    { "prompt": "I want to add a comma to the page title", "expect": false, "knownFalsePositive": true }
+  ],
+  "skills": {
+    "plan-feature": { "triggers": ["new feature"] },
+    "verify-integration": { "triggers": ["external service", "webhook", "data contract"] },
+    "reflect": { "triggers": ["corrects you"] },
+    "debugging": { "triggers": ["test fails", "before attempting any fix"] },
+    "pr-review": { "triggers": ["PR review", "diff"] },
+    "pr-scope": { "triggers": ["scope", "follow-up PRs"] },
+    "interview-me": { "triggers": ["underspecified", "interview me"] }
+  }
+}

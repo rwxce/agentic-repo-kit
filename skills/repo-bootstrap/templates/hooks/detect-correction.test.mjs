@@ -3,15 +3,11 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { describe, it } from 'node:test'
-import { detectCorrection, reflectContext, record } from './detect-correction.mjs'
+import { detectCorrection, reflectContext, record, PATTERNS, ENABLED_LANGUAGES } from './detect-correction.mjs'
 import { runScript } from './_helpers.mjs'
 
 describe('detect-correction', () => {
   const hits = [
-    "ja t'he dit que no ho facis així",
-    'has tornat a canviar el fitxer',
-    'ya te dije que no lo hicieras',
-    'lo has vuelto a romper',
     'I already told you to use tabs',
     "that's not what I asked",
     'you keep adding comments',
@@ -20,7 +16,7 @@ describe('detect-correction', () => {
   ]
   const misses = [
     "don't use emojis",
-    'no facis la PR',
+    'ya te dije que no lo hicieras', // Spanish is opt-in, off by default
     'please add a test',
     'what did I tell you last week about X?'.replace('tell you', 'say'),
     '<task-notification>I told you so</task-notification>',
@@ -28,6 +24,13 @@ describe('detect-correction', () => {
   ]
   for (const p of hits) it(`detects: ${p}`, () => assert.ok(detectCorrection(p)))
   for (const p of misses) it(`ignores: ${JSON.stringify(p)}`, () => assert.equal(detectCorrection(p), null))
+
+  it('English only by default; Spanish works when its patterns are passed', () => {
+    assert.deepEqual(ENABLED_LANGUAGES, ['en'])
+    assert.ok(detectCorrection('ya te dije que no lo hicieras', PATTERNS.es))
+    assert.ok(detectCorrection('lo has vuelto a romper', PATTERNS.es))
+    assert.equal(detectCorrection('please add a test', PATTERNS.es), null)
+  })
 
   it('ignores non-strings', () => assert.equal(detectCorrection(null), null))
 

@@ -3,6 +3,18 @@ import { describe, it } from 'node:test'
 import { classifyCommand, buildRules, askOutput, preview } from './guard-dangerous-commands.mjs'
 import { runScript, makeRepo, put } from './_helpers.mjs'
 
+// Fictional CLIs: the template ships with empty secretsClis/deployCommands, so tests configure them.
+const TEST_CONFIG = {
+  protectedBranches: ['main', 'master', 'production'],
+  secretsClis: ['secretsctl', 'keyvaultctl'],
+  deployCommands: [
+    { re: '\\bshipit\\s+deploy\\b[^|;&]*--prod\\b', why: 'deploys to production' },
+    { re: '\\binfractl\\s+(?:apply|destroy)\\b', why: 'changes real infrastructure' },
+  ],
+  previewBudgetMs: 3000,
+}
+const TEST_RULES = buildRules(TEST_CONFIG)
+
 describe('guard-dangerous-commands: asks', () => {
   const cases = [
     ['rm -rf .tmp/x', 'delete'],
@@ -31,21 +43,19 @@ describe('guard-dangerous-commands: asks', () => {
     ['git reset --hard origin/main', 'history'],
     ['git rebase origin/main', 'history'],
     ['git push origin --delete old-branch', 'history'],
-    ['terraform apply', 'production'],
-    ['npx convex deploy', 'production'],
-    ['netlify deploy --prod', 'production'],
-    ['wrangler deploy', 'production'],
-    ['kubectl delete pod x', 'production'],
-    ['infisical secrets get FOO', 'secrets'],
-    ['infisical run -- npm start', 'secrets'],
-    ['cd app && infisical secrets', 'secrets'],
-    ['FOO=1 infisical export', 'secrets'],
-    ['echo `infisical secrets`', 'secrets'],
-    ['env FOO=1 infisical run -- ls', 'secrets'],
-    ['npx infisical run -- ls', 'secrets'],
-    ['pnpm exec infisical run -- ls', 'secrets'],
-    ['bash -c "infisical secrets"', 'secrets'],
-    ['doppler run -- node x.js', 'secrets'],
+    ['shipit deploy --prod', 'production'],
+    ['npx shipit deploy --prod', 'production'],
+    ['infractl apply', 'production'],
+    ['secretsctl secrets get FOO', 'secrets'],
+    ['secretsctl run -- npm start', 'secrets'],
+    ['cd app && secretsctl secrets', 'secrets'],
+    ['FOO=1 secretsctl export', 'secrets'],
+    ['echo `secretsctl secrets`', 'secrets'],
+    ['env FOO=1 secretsctl run -- ls', 'secrets'],
+    ['npx secretsctl run -- ls', 'secrets'],
+    ['pnpm exec secretsctl run -- ls', 'secrets'],
+    ['bash -c "secretsctl secrets"', 'secrets'],
+    ['keyvaultctl run -- node x.js', 'secrets'],
     ['gh repo delete org/x', 'github'],
     ['gh pr merge 12 --squash', 'github'],
     ['gh secret set TOKEN', 'github'],
@@ -60,7 +70,7 @@ describe('guard-dangerous-commands: asks', () => {
     ['mysql -e "truncate table t"', 'data'],
   ]
   for (const [command, category] of cases) {
-    it(`${command} -> ${category}`, () => assert.equal(classifyCommand(command)?.category, category))
+    it(`${command} -> ${category}`, () => assert.equal(classifyCommand(command, TEST_RULES)?.category, category))
   }
 })
 
@@ -78,8 +88,9 @@ describe('guard-dangerous-commands: lets safe commands run', () => {
     'curl -s https://example.com -o page.html',
     'psql -c "DELETE FROM users WHERE id = 1"',
     'grep -rn "drop table" docs',
-    'grep -rn infisical docs',
-    'git commit -m "docs: explain infisical setup"',
+    'grep -rn secretsctl docs',
+    'git commit -m "docs: explain secretsctl setup"',
+    'shipit deploy --preview',
     'rm -f file-r.txt',
     'docker run --rm -it ubuntu ls -R',
     'rm -f a.txt\ngrep -rn foo src',
@@ -87,7 +98,7 @@ describe('guard-dangerous-commands: lets safe commands run', () => {
     '',
   ]
   for (const command of safe) {
-    it(`lets ${JSON.stringify(command)} run`, () => assert.equal(classifyCommand(command), null))
+    it(`lets ${JSON.stringify(command)} run`, () => assert.equal(classifyCommand(command, TEST_RULES), null))
   }
   it('ignores non-string input', () => assert.equal(classifyCommand(undefined), null))
 })
@@ -98,8 +109,13 @@ describe('guard-dangerous-commands: CONFIG', () => {
     assert.equal(classifyCommand('git push origin trunk', rules)?.category, 'history')
     assert.equal(classifyCommand('git push origin main', rules), null)
     assert.equal(classifyCommand('sops -d f.yaml', rules)?.category, 'secrets')
-    assert.equal(classifyCommand('infisical secrets', rules), null)
+    assert.equal(classifyCommand('secretsctl secrets', rules), null)
     assert.equal(classifyCommand('mydeploy now', rules)?.category, 'production')
+  })
+  it('defaults ship with no secrets or deploy CLIs', () => {
+    assert.equal(classifyCommand('secretsctl run -- ls'), null)
+    assert.equal(classifyCommand('shipit deploy --prod'), null)
+    assert.equal(classifyCommand('git push origin main')?.category, 'history')
   })
   it('empty lists disable the dynamic rules without throwing', () => {
     const rules = buildRules({ protectedBranches: [], secretsClis: [], deployCommands: [], previewBudgetMs: 1 })

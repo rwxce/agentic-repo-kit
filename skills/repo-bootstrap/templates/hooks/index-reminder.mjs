@@ -16,10 +16,15 @@ import { pathToFileURL } from 'node:url'
 // ---------------------------------------------------------------------------------------------
 // CONFIG — edit for your repo
 // ---------------------------------------------------------------------------------------------
+/** Where your code index writes its output (graph, ctags, SCIP dump...), relative to the project dir. */
+export const INDEX_PATH = '.code-index/graph.json'
+/** The command that queries it, shown in the reminder. */
+export const INDEX_QUERY_HINT = '`<code-index-cli> query "…"`'
+
 export const CONFIG = {
   /** The reminder only fires when this file exists (relative to the project dir). */
-  indexPath: 'graphify-out/graph.json',
-  reminder: 'A code index exists — prefer `graphify query "…"` for broad/multi-module questions before grep.',
+  indexPath: INDEX_PATH,
+  reminder: `A code index exists — prefer ${INDEX_QUERY_HINT} for broad/multi-module questions before grep.`,
   /** Temp marker file prefix; make it unique per project. */
   markerPrefix: 'agent-index-reminder-',
 }

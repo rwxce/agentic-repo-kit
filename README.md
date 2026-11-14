@@ -5,6 +5,8 @@ architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. **Asks 
 with evidence, generates only after your go.** Works for new and existing projects, with an
 optional behavior-preserving refactor plan.
 
+Site: <https://rwxce.github.io/agentic-repo-kit/>
+
 It ships one Claude Code skill, `/repo-bootstrap`, plus a library of templates. Everything in it
 was distilled from a real SaaS codebase where each guardrail was added after a concrete failure.
 
@@ -85,16 +87,17 @@ Nothing gets proposed without a signal in your repo that justifies it.
 
 | Family | Examples |
 |---|---|
-| Root rules | plan before code and wait for "go" · Clarifications on questioned plans · docs first · package before custom engineering (reliability checklist) · exact pins at least 5 days old · full-circle verification · review lanes · compliance stop-check · trim with audit |
+| Root rules | plan before code and wait for "go" · Clarifications on questioned plans + decision log · evidence before architecture · feasibility spikes gated per spike id · plan folders for multi-PR work · use-case table by user state · docs first · package before custom engineering (reliability checklist) · exact pins at least 5 days old · full-circle verification · review lanes · compliance stop-check · trim with audit |
 | Agents | orchestrator / implementer / reviewer roles · per-domain implementers with **Build rules** and a **Handoff brief** · diff reviewer · plan reviewer · reference agents |
-| Skills | `plan-feature` (size → consumer sweep → docs first → registry → invariants) · `verify-integration` (per-service recipes) · `reflect` (corrections become rules) · `debugging` · `pr-review` |
-| Hooks | outward-writes blocker (fail-closed) · dangerous-command gate with preview · feature-intent router · correction capture · session status · lint if changed · env-docs parity · compliance tripwire · branch policy · PR preflight |
+| Skills | `plan-feature` (size → consumer sweep → docs first → evidence gate → registry → invariants; plan folders, diagram/method pickers) · `verify-integration` (per-service recipes, evidence-stamped final message) · `reflect` (corrections become rules) · `debugging` (hazard search, mitigation ≠ root cause) · `pr-review` (independent vs self-check + seal) · `pr-scope` (freeze scope, route findings to follow-ups) · `interview-me` |
+| Commands | `pr-triage` (each review comment: in scope or deferred) |
+| Hooks | outward-writes blocker (fail-closed) · protected-branch guard · dangerous-command gate with preview · feature-intent router · correction capture · session status · session hand off (save/load) · index reminder and refresh · lint if changed · env-docs parity · compliance tripwire · branch policy · PR preflight (+ independent-review seal notice) |
 | Architecture tests | directory ↔ registry parity · registry ↔ filesystem · content ↔ assets · unique codes · i18n parity |
 | Custom lint | layer boundaries · no cycles · SDK gateways · native deps confined to one runtime · required colocated tests · catch must report · house wrappers |
-| CI | AI-config sync check · lint/typecheck/tests · parity checks · PR preflight · branch-policy guard · migration contract gate · review routing |
-| Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check |
+| CI | AI-config sync check · lint/typecheck/tests · parity checks · PR preflight · branch-policy guard · migration contract gate · contract issue on merge · plan-folder gate and stale check · post-deploy smoke · review routing |
+| Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check · skill lint · skill-routing pack · dependency-family check |
 | Permissions | deny → ask → allow layers for shell, secrets and outward actions |
-| Registries | side-effect registry · blueprint (inventory) · environment variables |
+| Registries | side-effect registry · blueprint (inventory) · environment variables · use-case matrix |
 | MCP servers | official servers for the services you use, with prod/sandbox split. Proposed only, never installed without your OK |
 
 The full catalog, with the failure behind each item, is in
@@ -118,16 +121,17 @@ skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
   references/              loaded on demand: options menu, discovery lenses, code style,
                            benchmark, decision matrix, guardrail catalog, MCP discovery, rulesync
-  templates/               rules, agents, skills, registries, hooks (+ tests), arch tests,
-                           lint, CI, automations
+  templates/               rules, agents, skills, commands, registries, hooks (+ tests),
+                           arch tests, lint, CI, automations
 ```
 
 ## Developing
 
-The hook templates have no dependencies and are tested with Node's built-in runner:
+The script templates (hooks, CI, automations, lint) have no dependencies and are tested with
+Node's built-in runner:
 
 ```bash
-node --test skills/repo-bootstrap/templates/hooks/
+node --test skills/repo-bootstrap/templates/**/*.test.mjs
 ```
 
 ## FAQ

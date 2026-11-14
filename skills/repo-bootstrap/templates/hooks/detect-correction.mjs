@@ -2,7 +2,7 @@
 /**
  * UserPromptSubmit — advisory.
  *
- * Spots a prompt where the person corrects the agent (en/es/ca), logs it to
+ * Spots a prompt where the person corrects the agent (languages in ENABLED_LANGUAGES), logs it to
  * `.context/reflect/corrections.jsonl` (keep that path gitignored) and tells the agent to run a
  * `reflect` skill before ending the turn, so repeated corrections become lasting rules.
  * The log lets the skill tell a one-off from a pattern across sessions.
@@ -19,6 +19,30 @@ import { pathToFileURL } from 'node:url'
 // ---------------------------------------------------------------------------------------------
 // CONFIG — edit for your repo
 // ---------------------------------------------------------------------------------------------
+/** Cue regexes per language. Add a language by adding a key and listing it in ENABLED_LANGUAGES. */
+export const PATTERNS = {
+  en: [
+    /\bi (?:already )?told you\b/i,
+    /\bi (?:already )?said (?:not to|to|that)\b/i,
+    /\b(?:that's|that is) not what i (?:asked|wanted|said)\b/i,
+    /\bnot what i asked\b/i,
+    /\bi asked you (?:not )?to\b/i,
+    /\byou keep (?:doing|adding|using|putting|making|forgetting|ignoring|breaking|changing)\b/i,
+    /\byou (?:did it|did that|did this|keep doing|are doing it) again\b/i,
+  ],
+  // Opt-in example: add 'es' to ENABLED_LANGUAGES if your team writes prompts in Spanish.
+  es: [
+    /\bya te (?:dije|he dicho)\b/i,
+    /\bte (?:lo )?(?:dije|he dicho)\b/i,
+    /\b(?:lo )?has vuelto a\b/i,
+    /\bno (?:es|era) (?:eso )?lo que te (?:dije|pedí|he pedido)\b/i,
+    /\bno te he pedido\b/i,
+  ],
+}
+
+/** Languages whose PATTERNS are active. English only by default. */
+export const ENABLED_LANGUAGES = ['en']
+
 export const CONFIG = {
   skill: 'reflect',
   /** Where hits are appended, relative to the project dir. */
@@ -28,31 +52,7 @@ export const CONFIG = {
     'The user may be correcting you. Fix what they asked, then, before ending this turn, apply the ' +
     '`{skill}` skill: check {logPath} and memory for the same correction and, if it repeats or ' +
     'states a lasting preference, propose (do not write yet) a rule in your agent config or a feedback memory.',
-  patterns: [
-    // Català
-    /\bja t'he dit\b/i,
-    /\bt'(?:ho )?he dit\b/i,
-    /\bet vaig (?:dir|demanar)\b/i,
-    /\bho has (?:tornat a|fet una altra vegada)\b/i,
-    /\bhas tornat a\b/i,
-    /\bno (?:és|era) (?:això|aixo) (?:el )?que (?:t'he|et vaig) (?:dit|demanat)/i,
-    /\bno m'has fet cas\b/i,
-    /\bno t'he demanat\b/i,
-    // Castellano
-    /\bya te (?:dije|he dicho)\b/i,
-    /\bte (?:lo )?(?:dije|he dicho)\b/i,
-    /\b(?:lo )?has vuelto a\b/i,
-    /\bno (?:es|era) (?:eso )?lo que te (?:dije|pedí|he pedido)\b/i,
-    /\bno te he pedido\b/i,
-    // English
-    /\bi (?:already )?told you\b/i,
-    /\bi (?:already )?said (?:not to|to|that)\b/i,
-    /\b(?:that's|that is) not what i (?:asked|wanted|said)\b/i,
-    /\bnot what i asked\b/i,
-    /\bi asked you (?:not )?to\b/i,
-    /\byou keep (?:doing|adding|using|putting|making|forgetting|ignoring|breaking|changing)\b/i,
-    /\byou (?:did it|did that|did this|keep doing|are doing it) again\b/i,
-  ],
+  patterns: ENABLED_LANGUAGES.flatMap((lang) => PATTERNS[lang] ?? []),
 }
 // ---------------------------------------------------------------------------------------------
 

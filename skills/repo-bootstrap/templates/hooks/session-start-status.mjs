@@ -21,6 +21,12 @@ import { pathToFileURL } from 'node:url'
 // ---------------------------------------------------------------------------------------------
 // CONFIG — edit for your repo
 // ---------------------------------------------------------------------------------------------
+/** Code index output, build log, CLI and install hint. Neutral placeholders: fill for your index. */
+export const INDEX_PATH = '.code-index/graph.json'
+export const INDEX_BUILD_LOG = '.context/code-index-setup.log'
+export const INDEX_CLI = '<code-index-cli>'
+export const INDEX_INSTALL_HINT = `install it first (see your index tool's docs), then \`${INDEX_CLI} update .\``
+
 export const CONFIG = {
   /** First of these that exists locally is the base for "commits ahead". */
   baseRefs: ['origin/dev', 'origin/develop', 'origin/main', 'origin/master'],
@@ -32,16 +38,16 @@ export const CONFIG = {
     'copy tweak or question), write the plan (use the `plan-feature` skill if you have one) before any code.',
   /** null disables the index status line. */
   index: {
-    name: 'code graph',
+    name: 'code index',
     /** Exists => index is ready. */
-    readyPath: 'graphify-out/graph.json',
-    /** Exists => a background build is in progress / was started. */
-    buildLogPath: '.context/graphify-setup.log',
+    readyPath: INDEX_PATH,
+    /** Exists => a background build is in progress / was started (see automations/workspace-setup.sh). */
+    buildLogPath: INDEX_BUILD_LOG,
     /** CLI that builds/queries the index; null skips the "installed?" probe. */
-    cli: 'graphify',
-    queryHint: 'use `graphify query "…"` for broad questions',
-    buildHint: 'run `graphify update` (builds graphify-out/)',
-    installHint: 'install it first (`uv tool install graphifyy`), then `graphify update`',
+    cli: INDEX_CLI,
+    queryHint: `use \`${INDEX_CLI} query "…"\` for broad questions`,
+    buildHint: `run \`${INDEX_CLI} update .\` (builds ${INDEX_PATH.split('/')[0]}/)`,
+    installHint: INDEX_INSTALL_HINT,
   },
 }
 // ---------------------------------------------------------------------------------------------

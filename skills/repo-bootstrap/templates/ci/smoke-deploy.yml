@@ -1,0 +1,43 @@
+# WHAT: Manual (or reusable) post-deploy smoke test: runs `scripts/smoke-deploy.mjs <url>`, which
+#   GETs a short list of paths and fails unless each answers 200.
+# REPO SIGNAL: deploys happen outside CI (a host's Git integration), so no job learns the deploy
+#   URL, and a build that passes can still ship routes that fail at module load.
+# CONFIGURE: call it from whatever knows the URL (a deploy hook, a `workflow_call` after your
+#   deploy job, a human); the runner label; the Node version file.
+name: Smoke test a deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Base URL to smoke test (e.g. https://preview.example.com)'
+        required: true
+  workflow_call:
+    inputs:
+      url:
+        description: 'Base URL to smoke test'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke test
+    runs-on: ubuntu-latest # <or your faster runner label>
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Run smoke test
+        env:
+          # The URL goes through env, never `${{ }}` inside the script.
+          SMOKE_URL: ${{ inputs.url }}
+        run: node scripts/smoke-deploy.mjs "$SMOKE_URL"

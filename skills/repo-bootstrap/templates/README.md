@@ -6,16 +6,17 @@ and skill files). Fill every `<placeholder>`; delete optional sections whose sig
 
 | Dir | Contents | Lands in the target repo as |
 |---|---|---|
-| `rules/` | `root.md` — root rules (plan + go, Clarifications, docs first, verification, git/review policy, agents roles, trim with audit…) | `.rulesync/rules/` or `CLAUDE.md`/`AGENTS.md` |
+| `rules/` | `root.md` — root rules (plan + go, Clarifications + decision log, evidence before architecture, spikes, plan folders, use-case table, docs first, verification, git/review policy, agents roles, trim with audit…) | `.rulesync/rules/` or `CLAUDE.md`/`AGENTS.md` |
 | `agents/` | `implementer.md`, `diff-reviewer.md`, `plan-reviewer.md`, `api-reference.md` | `.rulesync/subagents/` or `.claude/agents/` |
-| `skills/` | `plan-feature/` (+ sweep and handoff briefs, loop roadmap), `verify-integration/`, `reflect/`, `debugging/`, `pr-review/` | `.rulesync/skills/` or `.claude/skills/` |
-| `registries/` | `side-effect-registry.md`, `blueprint.md`, `environment-variables.md` | `docs/` |
+| `skills/` | `plan-feature/` (+ sweep and handoff briefs, loop roadmap, plan folder, evidence and spikes, diagram/method pickers, plan readability), `verify-integration/`, `reflect/`, `debugging/`, `pr-review/`, `pr-scope/` (+ scope and adversarial-review references), `interview-me/` | `.rulesync/skills/` or `.claude/skills/` |
+| `commands/` | `pr-triage.md` — classify each review comment as in scope or deferred against the frozen scope | `.rulesync/commands/` or `.claude/commands/` |
+| `registries/` | `side-effect-registry.md`, `blueprint.md`, `environment-variables.md`, `use-case-matrix.md` | `docs/` |
 | `rulesync/` | `rulesync.jsonc`, `permissions.jsonc`, `mcp.json` | repo root and `.rulesync/` |
-| `hooks/` | 11 hook scripts + `node:test` suites, `hooks.rulesync.json`, `settings.hooks.json`, README | `scripts/` + hook wiring |
+| `hooks/` | 15 hook scripts + 2 seal CLIs (`pr-precheck-seal`, `review-seal`), `node:test` suites, `hooks.rulesync.json`, `settings.hooks.json`, README | `scripts/` + hook wiring |
 | `arch-tests/` | directory↔registry parity, route registry, content assets, unique codes, i18n parity | next to the code they guard |
 | `lint/` | `eslint.local-rules.mjs` (+ tests), `eslint.config.snippet.mjs` | `eslint.config.*` |
-| `ci/` | `ci.yml`, `branch-policy-guard.yml`, `migration-contract-gate.yml`, `review-routing/`, PR template, CODEOWNERS | `.github/` |
-| `automations/` | `workspace-setup.sh`, `release-flow.md`, `check-vendored.mjs` (+ test) | `scripts/`, `.github/workflows/` |
+| `ci/` | `ci.yml`, `branch-policy-guard.yml`, `migration-contract-gate.yml`, `contract-issue.yml`, `smoke-deploy.yml`, `plan-folder/` (close check + gate + stale workflows), `review-routing/`, PR template, CODEOWNERS | `.github/` |
+| `automations/` | `workspace-setup.sh`, `release-flow.md`, `check-vendored.mjs`, `check-skills.mjs`, `check-dependency-families.mjs`, `smoke-deploy.mjs`, `skill-routing.cases.json` (each + test) | `scripts/`, `.github/workflows/` |
 
 Run every zero-dependency test in this folder with:
 
