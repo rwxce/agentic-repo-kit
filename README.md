@@ -36,7 +36,18 @@ CI) that make the rules impossible to forget.
 
 ## Install
 
-Copy the skill into a project or into your user skills:
+**Tell your agent** (Claude Code, Codex, Cursor, OpenCode…):
+
+```text
+Install the agentic-repo-kit skill by following https://github.com/rwxce/agentic-repo-kit/blob/main/INSTALL.md
+```
+
+It asks whether you want the skill for every project or only this repository, copies
+`skills/repo-bootstrap` into the right skills folder and tells you when `/repo-bootstrap` is
+ready. The steps it follows are in [`INSTALL.md`](INSTALL.md).
+
+<details>
+<summary>Install manually</summary>
 
 ```bash
 git clone https://github.com/rwxce/agentic-repo-kit.git
@@ -46,6 +57,8 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/              # ev
 
 Other agent tools that read `SKILL.md`-style skills can use the same folder. The templates are
 plain files.
+
+</details>
 
 ## Use
 

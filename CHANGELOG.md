@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.0 — 2026-11-14
+
+### Added
+- `INSTALL.md`: install instructions written for AI agents. Paste one prompt into Claude Code,
+  Codex, Cursor or OpenCode and the agent asks the scope, copies `skills/repo-bootstrap` and
+  confirms.
+- Logo (an "A" drawn as a git graph ending in a "go" commit) in the README, site navbar and
+  favicon.
+- Site: "Copy the prompt for your agent" as the main action. The install card centres on
+  screen, and the manual git commands fold away.
+- Site: smooth scroll (Lenis 1.3.26, vendored, off with reduced motion).
+
+### Changed
+- Site navbar: one compact row on mobile, sticky with a blurred background.
+- README Install starts with the agent prompt; manual install folded below.
+
 ## 0.3.0 — 2026-11-14
 
 ### Added
