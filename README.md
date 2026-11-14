@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/social-preview.png" width="100%" alt="agentic-repo-kit: Asks first. Then builds.">
+  <img src="site/assets/logo.svg" width="96" height="96" alt="agentic-repo-kit logo">
 </p>
 
 <h1 align="center">agentic-repo-kit</h1>
