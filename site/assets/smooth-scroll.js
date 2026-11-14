@@ -12,7 +12,15 @@
     var target = href.length > 1 ? document.getElementById(href.slice(1)) : document.body
     if (!target) return
     event.preventDefault()
-    lenis.scrollTo(target)
+    // Lenis already honours scroll-margin-top (clears the sticky navbar). data-scroll-center
+    // lands the target centred in the viewport instead (the install card).
+    var offset = 0
+    if (anchor.hasAttribute('data-scroll-center')) {
+      var margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0
+      var gap = (window.innerHeight - target.getBoundingClientRect().height) / 2
+      offset = margin - Math.max(margin, gap)
+    }
+    lenis.scrollTo(target, { offset: offset })
     history.pushState(null, '', href)
   })
 })()
