@@ -123,11 +123,12 @@ Then:
   command — marked "needs your OK".
 - **Later**: things considered and deferred, with the signal that would justify them.
 - **PR map**: e.g. (1) rulesync + root rules + registries, (2) hooks + permissions, (3) agents +
-  skills, (4) architecture tests + lint (as `warn`), (5) CI, (6) refactor plan if chosen.
+  skills + commands, (4) architecture tests + lint (as `warn`), (5) CI, (6) refactor plan if chosen.
 - **Verification plan** (Phase 6) and the tools it needs; ask for missing tools now.
 - **Clarifications**: when the user questions a point, add a final `## Clarifications` section — the
   question, a complete answer (why, concrete data, a Mermaid diagram for flows/roles/before-after)
-  and what changes. Remove an entry once the user approves it ("already approved: …").
+  and what changes. Remove an entry once the user approves it ("already approved: …") and record it
+  in a `## Decisions` list at the end of the proposal, so approved points are not re-litigated.
 
 Stop and wait for "go". Adjust and re-present on any correction.
 

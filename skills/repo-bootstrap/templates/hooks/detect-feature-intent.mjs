@@ -2,9 +2,9 @@
 /**
  * UserPromptSubmit — advisory.
  *
- * Spots a prompt that asks for a NEW feature (en/es/ca) and injects a one-line context telling
+ * Spots a prompt that asks for a NEW feature (languages in ENABLED_LANGUAGES) and injects a one-line context telling
  * the agent to follow your planning skill before writing the plan. Deliberately narrow:
- * bugfixes ("fix", "arregla"), questions and one-off tweaks must not trigger it — a miss is
+ * bugfixes ("fix"), questions and one-off tweaks must not trigger it — a miss is
  * cheap, a false positive is noise.
  *
  * Contract: stdin `{ prompt }`; prints `hookSpecificOutput.additionalContext` or nothing.
@@ -16,6 +16,30 @@ import { pathToFileURL } from 'node:url'
 // ---------------------------------------------------------------------------------------------
 // CONFIG — edit for your repo
 // ---------------------------------------------------------------------------------------------
+/**
+ * Cue regexes per language. Keep them anchored on "I want to build/add ..." cues. Add a language
+ * by adding a key here and listing it in ENABLED_LANGUAGES.
+ */
+export const PATTERNS = {
+  en: [
+    /\b(?:add|build|implement|create) (?:a |an |the )?(?:new )?feature\b/i,
+    /\bnew feature\b/i,
+    /\bi want (?:users|customers|people) to\b/i,
+    /\bi want to (?:add|build|implement|create)\b/i,
+    /\bwe need (?:an? |to (?:add|build) (?:an? )?)(?:new )?(?:feature|flow|screen|integration)\b/i,
+  ],
+  // Opt-in example: add 'es' to ENABLED_LANGUAGES if your team writes prompts in Spanish.
+  es: [
+    /\bquiero (?:hacer|añadir|agregar|implementar|crear|construir|montar) (?:una? |la |el |los |las )?(?:nueva |nuevo |nuevas |nuevos )?(?:funcionalidad|feature|pantalla|flujo|sección|integración|sistema|módulo)/i,
+    /\bquiero que (?:los )?(?:usuarios|clientes|el usuario)\b/i,
+    /\bnuevas? funcionalidad(?:es)?\b/i,
+    /\bquiero (?:añadir|agregar|implementar|construir)\b/i,
+  ],
+}
+
+/** Languages whose PATTERNS are active. English only by default. */
+export const ENABLED_LANGUAGES = ['en']
+
 export const CONFIG = {
   /** The skill the agent is routed to. */
   skill: 'plan-feature',
@@ -23,25 +47,7 @@ export const CONFIG = {
   context:
     'Feature request detected → classify its size (small/normal/big) and follow the ' +
     '`{skill}` skill before writing the plan.',
-  /** Add languages by appending regexes. Keep them anchored on "I want to build/add ..." cues. */
-  patterns: [
-    // Català
-    /\bvull (?:fer|afegir|implementar|crear|construir|muntar) (?:una? |la |el |els |les )?(?:nova |nou |noves |nous )?(?:funcionalitat|feature|pantalla|flux|secció|integració|sistema|mòdul)/i,
-    /\bvull que (?:els )?(?:usuaris|clients|l'usuari)\b/i,
-    /\b(?:nova|noves) funcionalitats?\b/i,
-    /\bvull (?:afegir|implementar|crear|construir)\b/i,
-    // Castellano
-    /\bquiero (?:hacer|añadir|agregar|implementar|crear|construir|montar) (?:una? |la |el |los |las )?(?:nueva |nuevo |nuevas |nuevos )?(?:funcionalidad|feature|pantalla|flujo|sección|integración|sistema|módulo)/i,
-    /\bquiero que (?:los )?(?:usuarios|clientes|el usuario)\b/i,
-    /\bnuevas? funcionalidad(?:es)?\b/i,
-    /\bquiero (?:añadir|agregar|implementar|construir)\b/i,
-    // English
-    /\b(?:add|build|implement|create) (?:a |an |the )?(?:new )?feature\b/i,
-    /\bnew feature\b/i,
-    /\bi want (?:users|customers|people) to\b/i,
-    /\bi want to (?:add|build|implement|create)\b/i,
-    /\bwe need (?:an? |to (?:add|build) (?:an? )?)(?:new )?(?:feature|flow|screen|integration)\b/i,
-  ],
+  patterns: ENABLED_LANGUAGES.flatMap((lang) => PATTERNS[lang] ?? []),
 }
 // ---------------------------------------------------------------------------------------------
 

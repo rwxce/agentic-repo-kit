@@ -1,0 +1,90 @@
+# WHAT: Fails a PR whose `Closes-plan: <initiative>` marker and plan-folder deletion do not match:
+#   a marker that deletes nothing (typo), a marker that leaves files behind, or a folder deleted
+#   without the marker. The logic lives in `scripts/check-plan-close.mjs` (tested).
+# REPO SIGNAL: multi-PR initiatives keep `docs/plans/<initiative>/` with a decision log, and the
+#   last PR is supposed to promote what must outlive it and delete the folder.
+# CONFIGURE: `branches` (your integration branch), the plans path in the regex and the script's
+#   CONFIG.plansPrefix, the runner label.
+name: Plan folder gate
+
+on:
+  # `pull_request_target` reads this workflow from the repository's DEFAULT branch, not from the
+  # PR's base. If the default branch is not the integration branch, the gate does not run until a
+  # release carries this file there; say so in the rule that points to it (advisory until then).
+  # The checkout below is the PR's BASE commit, so no code from the pull request is executed; the
+  # PR is only read through the API. If that commit predates scripts/check-plan-close.mjs, the
+  # import fails and the check goes red.
+  # `edited` is included so that fixing the PR body re-runs the check and clears it.
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches: [<integration-branch>]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: plan-folder-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-plan-close:
+    runs-on: ubuntu-latest # <or your faster runner label>
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Check that Closes-plan and the folder deletion match
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { pathToFileURL } = require('node:url');
+            const { planCloseProblems, closedPlans, CONFIG } = await import(
+              pathToFileURL(`${process.env.GITHUB_WORKSPACE}/scripts/check-plan-close.mjs`).href
+            );
+            const prefix = CONFIG.plansPrefix;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            // Re-read the PR so an `edited` run queued behind a later edit checks the current body.
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100,
+            });
+
+            const candidates = new Set(closedPlans(pr.body));
+            for (const { filename, previous_filename } of files) {
+              for (const path of [filename, previous_filename]) {
+                if (!path?.startsWith(prefix)) continue;
+                const parts = path.slice(prefix.length).split('/');
+                if (parts.length > 1) candidates.add(parts[0]);
+              }
+            }
+
+            // Check the folder as it will look after merging; fall back to the head commit when
+            // GitHub has not computed the merge commit. A file added to the base after this ran can
+            // still survive the close, so the gate narrows that case but does not remove it.
+            const checkRef = pr.merge_commit_sha || pr.head.sha;
+            const atHead = new Map();
+            for (const slug of candidates) {
+              try {
+                await github.rest.repos.getContent({ owner, repo, path: `${prefix}${slug}`, ref: checkRef });
+                atHead.set(slug, true);
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                atHead.set(slug, false);
+              }
+            }
+
+            const problems = planCloseProblems({
+              body: pr.body,
+              files,
+              folderExistsAtHead: (slug) => atHead.get(slug) === true,
+            });
+            if (problems.length > 0) core.setFailed(problems.join('\n'));

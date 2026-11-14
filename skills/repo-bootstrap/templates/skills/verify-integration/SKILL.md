@@ -75,6 +75,33 @@ browser. If a variant cannot be reached, say which and why.
 
 This section's format overrides the default chat length limit; keep it to one line per case.
 
-- Cases checked, each with its evidence (screenshot, run id, issue link, command output).
+- Cases checked, each with its evidence (screenshot, run id, issue link, command output), the
+  **revision it ran on** (short sha, and `clean` or `dirty: <files>`) and a status: `passed`,
+  `failed`, `blocked` or `not run`.
 - Expected vs observed, with any difference explained.
 - What was not verified, why, and what only the tests cover. Never imply it was seen.
+
+Evidence rules:
+- An inferred result is not a run: call a check executed only when its real invocation and output
+  are in front of you.
+- Reused evidence says so — `reused from <sha>, NOT re-run` — and is reused only while the code,
+  dependencies, data and environment it covered are unchanged. Code changed after a screenshot
+  means a new screenshot.
+- Missing evidence is unproven, not a pass and not a failure: report it as `not run`.
+
+Example:
+```
+- Billing page 375px <locale> → passed · a1b2c3d (clean) · .context/billing-375.png
+- Payment webhook failure path → failed · a1b2c3d (dirty: src/billing/webhook.ts) · run <id> returns 500
+- Real Safari → not run · needs you
+- Quota tests → passed · reused from 9f8e7d6, NOT re-run
+```
+
+## Hand off
+
+<!-- optional: include if the repo installs the save-handoff / load-handoff hooks -->
+`scripts/save-handoff.mjs` (Stop and PreCompact hooks) rewrites `.context/handoff.md` after every
+turn from git plus the **pending block of your last message**, and `load-handoff.mjs` points the
+next chat at it. So in a long session keep that block current: checks still pending with their
+status, the blocker if any, and the exact next action. When the hook says the context is long,
+offer the user a new chat; nothing needs pasting.

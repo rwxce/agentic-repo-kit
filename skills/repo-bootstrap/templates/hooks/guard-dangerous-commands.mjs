@@ -24,25 +24,17 @@ export const CONFIG = {
   protectedBranches: ['main', 'master', 'production'],
   /**
    * Secrets managers: ANY invocation asks (reads included) when written in command position.
-   * Add `doppler`, `vault`, `op`, `sops`, `aws-vault`... as your team uses them; [] disables.
+   * Empty by default; list the CLI(s) your team uses, e.g. ['<secrets-cli>', 'sops', 'aws-vault'].
    */
-  secretsClis: ['infisical', 'doppler', 'vault'],
-  /** Deploy / infra CLIs: regex SOURCE + why. Add yours (`fly deploy`, `kubectl delete`, ...). */
-  deployCommands: [
-    { re: '\\bvercel\\b[^|;&]*--prod\\b', why: 'deploys to Vercel production' },
-    { re: '\\bnetlify\\s+deploy\\b[^|;&]*--prod\\b', why: 'deploys to Netlify production' },
-    { re: '\\bwrangler\\s+(?:deploy|delete|publish)\\b', why: 'deploys or deletes a Cloudflare Worker' },
-    { re: '\\bfirebase\\s+deploy\\b', why: 'deploys to Firebase' },
-    { re: '\\bfly(?:ctl)?\\s+(?:deploy|destroy)\\b', why: 'deploys or destroys a Fly.io app' },
-    { re: '\\bserverless\\s+(?:deploy|remove)\\b', why: 'deploys or removes a serverless stack' },
-    { re: '\\bterraform\\s+(?:apply|destroy)\\b', why: 'changes real infrastructure' },
-    { re: '\\bpulumi\\s+(?:up|destroy)\\b', why: 'changes real infrastructure' },
-    { re: '\\bkubectl\\s+(?:delete|apply)\\b', why: 'changes a live Kubernetes cluster' },
-    { re: '\\bhelm\\s+(?:install|upgrade|uninstall)\\b', why: 'changes a live Kubernetes release' },
-    { re: '\\bconvex\\s+deploy\\b', why: 'deploys Convex functions' },
-    { re: '\\bsupabase\\s+(?:db\\s+push|functions\\s+deploy)\\b', why: 'changes the linked Supabase project' },
-    { re: '\\b(?:prisma\\s+migrate\\s+deploy|prisma\\s+db\\s+push)\\b', why: 'applies schema changes to the configured database' },
-  ],
+  secretsClis: [],
+  /**
+   * Deploy / infra CLIs: regex SOURCE + why. Empty by default; add the ones your repo uses, e.g.:
+   *   { re: '\\b<deploy-cli>\\s+deploy\\b[^|;&]*--prod\\b', why: 'deploys to production' },
+   *   { re: '\\bterraform\\s+(?:apply|destroy)\\b', why: 'changes real infrastructure' },
+   *   { re: '\\bkubectl\\s+(?:delete|apply)\\b', why: 'changes a live Kubernetes cluster' },
+   *   { re: '\\b(?:prisma\\s+migrate\\s+deploy|prisma\\s+db\\s+push)\\b', why: 'applies schema changes' },
+   */
+  deployCommands: [],
   /** Max time (ms) the read-only preview may spend; keep well inside the hook timeout. */
   previewBudgetMs: 3000,
 }
@@ -78,7 +70,7 @@ export function buildRules(config = CONFIG) {
   for (const { re, why } of config.deployCommands) rules.push({ category: 'production', re: new RegExp(re), why })
   if (config.secretsClis.length) {
     const names = config.secretsClis.map(esc).join('|')
-    // Command position only (start, after ; & | ( `, env/time/npx/bash -c...), so `grep infisical docs` is fine.
+    // Command position only (start, after ; & | ( `, env/time/npx/bash -c...), so `grep <secrets-cli> docs` is fine.
     rules.push({
       category: 'secrets',
       re: new RegExp(`(?:^|[;&|(\`]\\s*|\\b(?:env|time|command|exec|npx|bunx|pnpm\\s+(?:exec|dlx)|sh\\s+-c|bash\\s+-c|zsh\\s+-c)\\s+["']?)(?:\\w+=\\S*\\s+)*(?:sudo\\s+)?(?:${names})\\b`),

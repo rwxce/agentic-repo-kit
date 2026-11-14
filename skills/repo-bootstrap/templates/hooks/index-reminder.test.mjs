@@ -9,7 +9,7 @@ import { runScript } from './_helpers.mjs'
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'idx-'))
 const projectWithIndex = () => {
   const dir = tmp()
-  fs.mkdirSync(path.join(dir, 'graphify-out'))
+  fs.mkdirSync(path.dirname(path.join(dir, CONFIG.indexPath)), { recursive: true })
   fs.writeFileSync(path.join(dir, CONFIG.indexPath), '{}')
   return dir
 }

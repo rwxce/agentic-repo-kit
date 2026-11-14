@@ -43,7 +43,7 @@ describe('session-start-status: collect (integration)', () => {
   it('stays quiet about planning once there is work, and reports a ready index', () => {
     const repo = makeRepo({ 'a.js': 'a' }, 'main')
     git(repo, 'checkout', '-qb', 'feat/new')
-    put(repo, { 'b.js': 'b', 'graphify-out/graph.json': '{}' })
+    put(repo, { 'b.js': 'b', [CONFIG.index.readyPath]: '{}' })
     const lines = collect(repo, noCli)
     assert.equal(lines.length, 1)
     assert.match(lines[0], /ready/)

@@ -22,7 +22,10 @@ over prose — prose is for judgment, code is for rules.
 | Section | Include when |
 |---|---|
 | Plan before code + wait for "go" | always |
-| Clarifications section on questioned plans | always |
+| Clarifications section on questioned plans + decision log (`decisions.md` / `## Decisions`) | always |
+| Evidence before architecture; feasibility spikes need an OK per spike id | always (cheap); critical for integrations and unfamiliar tech |
+| Plan folders for multi-PR initiatives (written in the user's language, closed by the last PR) | initiatives regularly span several PRs |
+| Use-case table from `docs/use-case-matrix.md` (states + transitions; review findings checked against named product rules) | behaviour depends on user state (plan tier, feature toggles, record lifecycle) |
 | Docs first + package before custom (reliability checklist, exact pins ≥5 days) | always |
 | Plan covers only the current ask | always |
 | Feature requests → plan-feature (size small/normal/big) | repo has >1 domain or any sensitive domain |
@@ -57,7 +60,9 @@ strongest for diffs. Allow a one-call upgrade of an implementer for big creative
 | External services, webhooks, jobs or UI | `verify-integration` with one recipe row per detected service |
 | Always | `reflect` (corrections → proposed rule/memory, written only after a yes) |
 | Non-trivial codebase | `debugging` (reproduce → localize → reduce → fix root cause → regression test) |
-| PR workflow | `pr-review` (diff-based, security/regressions first, no nits) and a PR-creation command |
+| PR workflow | `pr-review` (diff-based, security/regressions first, no nits, `Type: independent \| self-check` + review seal) and a PR-creation command |
+| Review-heavy PRs that keep growing | `pr-scope` (freeze scope, route out-of-scope findings to follow-up PRs) + `pr-triage` command |
+| Asks often arrive underspecified | `interview-me` (one question at a time, each with a guess, before any plan) |
 | Auth + UI | a test-login skill (throwaway test user, reach states without the human) |
 | Repeated multi-step workflow found in docs/scripts (release, seed, data fix) | a project skill for it |
 

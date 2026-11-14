@@ -12,6 +12,10 @@
  * Default: print findings, exit 0 (mid-work blocking a turn would be absurd).
  * `--strict`: exit 1 on any finding — wire this into CI so a PR cannot merge with a violation.
  *
+ * Advisory mode only: when the diff touches a sensitive path (CONFIG.sensitivePaths) and there
+ * is no fresh independent-review seal (review-seal.mjs, written by a fresh-context review of
+ * this exact diff), it prints a notice. Needs review-seal.mjs next to this file; skipped otherwise. The seal is local (.context/), so --strict never checks it.
+ *
  * In CI the base is not guessed: GITHUB_BASE_REF / PR_BASE_REF (pull_request) or PUSH_BEFORE_SHA
  * (push) are honored first; locally the baseRefs list is probed.
  */
@@ -35,6 +39,22 @@ export const CONFIG = {
   envAllowed: ['.env.example', '.env.local.example', '.env.sample', '.env.template', '.env.dist'],
   /** Where heavy files should go instead (shown in the message). */
   heavyFileAdvice: 'Keep heavy sources in an asset repo / Git LFS and commit only the small web deliverables.',
+  /**
+   * Paths that make a diff flow-sensitive (data, auth, billing, public entry points, CI,
+   * dependencies). Keep in sync with your review-routing sensitive list. [] disables the notice.
+   */
+  sensitivePaths: [
+    /(^|\/)migrations\//,
+    /(^|\/)db\/schema/,
+    /(^|\/)auth\//,
+    /(^|\/)billing\//,
+    /(^|\/)api\//,
+    /^\.github\/workflows\//,
+    /(^|\/)package\.json$/,
+    /(^|\/)(?:pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lockb?)$/,
+  ],
+  /** Shown with the notice: how to get the seal. */
+  reviewHint: 'run /pr-review (or the diff-reviewer agent) in a fresh context before opening the PR; the reviewer writes the seal.',
 }
 // ---------------------------------------------------------------------------------------------
 
@@ -138,6 +158,33 @@ export function findProblems(cwd = process.cwd(), config = CONFIG, env = process
   return problems
 }
 
+export function isSensitivePath(file, config = CONFIG) {
+  return config.sensitivePaths.some((re) => re.test(file))
+}
+
+/** Advisory notice when a flow-sensitive diff lacks a fresh review seal, else null. */
+export function reviewSealNotice(cwd = process.cwd(), config = CONFIG, env = process.env, sealStatus = null) {
+  // sealStatus is review-seal.mjs's reviewSealStatus; without that script the notice is skipped.
+  if (!sealStatus || !config.sensitivePaths.length) return null
+  const base = resolveBase(config, cwd, env)
+  if (!base) return null
+  const changed = [
+    ...git(['diff', '--name-only', base], cwd).split('\n'),
+    ...git(['ls-files', '--others', '--exclude-standard'], cwd).split('\n'),
+  ].filter(Boolean)
+  const sensitive = [...new Set(changed)].filter((f) => isSensitivePath(f, config))
+  if (sensitive.length === 0) return null
+  let status = 'missing'
+  try {
+    const root = git(['rev-parse', '--show-toplevel'], cwd).trim()
+    const branch = git(['branch', '--show-current'], cwd).trim()
+    const baseRef = env.GITHUB_BASE_REF || env.PR_BASE_REF
+    status = baseRef ? sealStatus(root, branch, baseRef) : sealStatus(root, branch)
+  } catch {}
+  if (status === 'fresh') return null
+  return `\nIndependent review ${status} for this flow-sensitive diff (${sensitive.length} sensitive file(s)): ${config.reviewHint}\n`
+}
+
 export function formatReport(problems) {
   const lines = ['\nPR preflight — this branch ships unsafe, not just incomplete:\n']
   for (const { label, detail } of problems) lines.push(`  • ${label}\n      ${detail}`)
@@ -149,5 +196,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const strict = process.argv.includes('--strict')
   const problems = findProblems(process.env.CLAUDE_PROJECT_DIR || process.cwd())
   if (problems.length) console.log(formatReport(problems))
+  if (!strict) {
+    try {
+      // Optional: only when review-seal.mjs (+ pr-precheck-seal.mjs) sit next to this script.
+      const seal = await import('./review-seal.mjs').catch(() => null)
+      const notice = reviewSealNotice(process.env.CLAUDE_PROJECT_DIR || process.cwd(), CONFIG, process.env, seal?.reviewSealStatus)
+      if (notice) console.log(notice)
+    } catch {}
+  }
   process.exit(strict && problems.length ? 1 : 0)
 }

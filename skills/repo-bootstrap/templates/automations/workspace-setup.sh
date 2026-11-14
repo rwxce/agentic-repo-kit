@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# WHAT: Setup script for a fresh checkout or parallel worktree (Conductor, git worktree, Codespaces,
+# WHAT: Setup script for a fresh checkout or parallel worktree (your ADE, git worktree, Codespaces,
 #   a Claude Code worktree hook): install deps, run codegen, then build/copy the code index in the
 #   background WITHOUT ever failing setup.
 # REPO SIGNAL: several parallel worktrees per repo, a code-index/graph tool, generated code needed
@@ -10,7 +10,7 @@ set -o pipefail
 
 INSTALL_CMD="${INSTALL_CMD:-pnpm install}"
 CODEGEN_CMD="${CODEGEN_CMD:-}"                     # e.g. "pnpm exec <tool> codegen"; empty = skip
-INDEX_DIR="${INDEX_DIR:-<index-out-dir>}"          # e.g. graphify-out
+INDEX_DIR="${INDEX_DIR:-<index-out-dir>}"          # e.g. .code-index
 INDEX_FILE="${INDEX_FILE:-<index-out-dir>/graph.json}"   # file whose existence means "index is built"
 INDEX_UPDATE_CMD="${INDEX_UPDATE_CMD:-<tool> update .}"  # incremental refresh
 INDEX_BUILD_CMD="${INDEX_BUILD_CMD:-<tool> extract . --code-only}" # full build

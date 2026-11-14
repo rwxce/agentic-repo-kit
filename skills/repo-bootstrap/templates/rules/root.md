@@ -30,7 +30,8 @@ Always reply in the language of the user's latest message — never force a defa
 switch mid-thread. Plans and their Clarifications follow the same rule. Everything that is a repo
 artifact stays in <artifact language, usually English> regardless of the conversation: code,
 code comments, identifiers, commit messages, PR bodies, and every file under `.rulesync/`
-(skills, agents and commands included).
+(skills, agents and commands included). The one exception: plan folders under `docs/plans/` are
+written in the user's language, keeping paths, identifiers and code in English.
 
 ## Plan before code
 
@@ -48,8 +49,36 @@ plans or already-done steps; if earlier context matters, reference it in one lin
 `## Clarifications` section: one entry per doubt with the question, a complete and detailed
 answer (the why, concrete data and examples, and a Mermaid diagram when there is a flow, roles
 or a before/after) and what changes in the plan. When the user approves a point, remove it from
-the section in the next reply, leaving one line "already approved: …". This section is exempt
-from the response-length limit.
+the section in the next reply, leaving one line "already approved: …", and add it to the
+decision log (`decisions.md` in the plan folder, or the plan's `## Decisions`). The plan body
+changes only when the user asks to consolidate (hypotheses and their evidence tags are updated as
+soon as they are settled). This section is exempt from the response-length limit.
+
+**Evidence before architecture.** Docs and READMEs are not proof. A plan separates what is
+verified, read, assumed, refuted and accepted, and writes no schema, pins or roadmap on a critical
+hypothesis still unresolved (`plan-feature`, `references/evidence-and-spikes.md`).
+
+**Feasibility spikes.** No spike runs without the user's explicit OK for that spike id, even a
+local script, a benchmark, a connection to an external service or an install made to try
+something. An OK covers that spike only: not another spike, the implementation or extra
+operations. A spike has no default and stops the whole loop, so spikes are done before the "go".
+In plan mode an authorized spike leaves plan mode only for that spike, confined to
+`.context/spike/<id>/`; that is not a "go". Reading code and docs, and the verification of an item
+already approved with a "go" (`<lint>`, `<test>`, `verify-integration`), are not spikes.
+
+**Plan folders.** An initiative spanning several PRs lives in `docs/plans/<initiative>/` with its
+`decisions.md`. Its last PR promotes what must outlive it, deletes the folder and carries
+`Closes-plan: <initiative>` (`plan-feature`, `references/plan-folder.md`; enforced by
+`plan-folder-gate.yml`). <!-- optional: drop this paragraph if the repo never runs multi-PR initiatives -->
+
+<!-- optional: include if behaviour depends on the user's state (plan tier, toggles, entity
+     lifecycle, roles) and the repo keeps docs/use-case-matrix.md -->
+**Use cases.** Any plan that changes behaviour depending on the user's state — features, fixes and
+review triage alike — carries a use-case table built from `docs/use-case-matrix.md`: the affected
+states (<the repo's axes>) **and the transitions between them** (e.g. paid → free, a toggle
+on → off), each with the expected response. A review finding is checked against the matrix's
+named product rules before it is accepted; one that contradicts a rule is discarded with the
+rule's name.
 
 **Every feature request goes through the `plan-feature` skill.** Step 0 sizes the work
 (small / normal / big — when in doubt, the bigger one) and the plan's first line states the size
@@ -175,7 +204,7 @@ server), stop it before considering the task done — the tool's own stop mechan
 exists, otherwise `kill`/Ctrl-C. Several parallel workspaces each leaving a dev server running
 exhausts the machine.
 
-<!-- optional: include if the repo has secrets in a manager (Infisical, Doppler, 1Password CLI, Vault) -->
+<!-- optional: include if the repo has secrets in a manager (a `<secrets CLI>`) -->
 ### Secrets manager
 
 NEVER run any `<secrets CLI>` command — including read-only ones — without explicit permission
@@ -227,7 +256,7 @@ checks whether the correction repeats or states a standing preference and propos
 
 ## Codebase navigation
 
-<!-- optional: include if a code-graph tool is set up (graphify, a language server index, ctags…) -->
+<!-- optional: include if a code-graph tool is set up (a `<code index>`, a language server index, ctags…) -->
 A local code graph lives at `<path>`. When it exists, `<query command>` is the **first step** of
 any non-trivial analysis (multi-module changes, auth/billing, data-flow tracing, unfamiliar areas,
 bug hunts) and its result goes into the Handoff brief. The source code is authoritative; if graph
@@ -253,8 +282,9 @@ specific results.
 
 - Chat messages default to 3-5 lines: valuable and complete, but not long. If a fuller
   explanation seems useful, give the short version first and offer to expand.
-- Does not apply to: the written plan and its Clarifications, or output formats a skill defines
-  (for example `pr-review`, the `verify-integration` final message).
+- Does not apply to: the written plan and its Clarifications, replies in a plan discussion that
+  weigh alternatives (answer the doubt in hand, showing only what changed), or output formats a
+  skill defines (for example `pr-review`, the `verify-integration` final message).
 - Code/logic explanations: state the rule + one example, skip walking through every branch.
 - Technical explanations: lead with a plain-language summary and a concrete example.
 - Avoid fabricating data (ratings, non-existent file references). If unsure, ask or omit.

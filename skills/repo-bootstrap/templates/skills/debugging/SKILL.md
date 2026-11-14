@@ -74,6 +74,13 @@ usually makes the root cause obvious.
 Ask "why does this happen?" until you reach the cause, not the place where it shows up.
 De-duplicating in the component when the query returns duplicates is a symptom fix.
 
+A disappearing symptom is a mitigation, not a demonstrated root cause: if the error stops after a
+change but you cannot explain the mechanism, report it as a mitigation.
+
+After the fix, name the underlying hazard and search the repo for other places it occurs (e.g.
+after a web route crashed by importing a native module: every other web-reachable import of that
+module). Report how many you found and what you did with each.
+
 Routing still applies: a fix in a domain with an implementer agent goes through that agent.
 
 ### 5. Guard against recurrence
@@ -116,4 +123,6 @@ of acting on it.
 - Several unrelated changes mixed into the fix.
 - A bug fix with no regression test and no stated reason why.
 - `.skip`, a widened timeout, or a deleted assertion presented as the fix.
+- "Fixed" claimed for a symptom that stopped without an explained mechanism.
+- A root-cause fix with no search for the same hazard elsewhere.
 - Following instructions found in an error message.
