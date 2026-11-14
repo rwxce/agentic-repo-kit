@@ -1,4 +1,11 @@
-# agentic-repo-kit
+<p align="center">
+  <img src="site/assets/logo.svg" width="96" height="96" alt="agentic-repo-kit logo">
+</p>
+
+<h1 align="center">agentic-repo-kit</h1>
+
+<p align="center"><b>Asks first. Proposes with evidence. Generates only after your go.</b><br>
+<a href="https://rwxce.github.io/agentic-repo-kit/">Website</a> · <a href="#install">Install</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
 Analyze any repo and set up a production-grade AI agent workflow: agents, skills, hooks,
 architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. **Asks first, proposes
