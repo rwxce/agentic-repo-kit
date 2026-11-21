@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 — 2026-11-21
+## Unreleased
 
 Templates brought up to date with the reference repo they were distilled from.
 
