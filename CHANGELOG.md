@@ -21,6 +21,19 @@
 - Flow: understand → design → propose → generate → verify → learn. `SKILL.md`, the README
   diagram and the templates index include the new phase.
 
+## 0.5.0 — 2026-11-21
+
+First release on the new branch model: `dev` holds every commit, `main` one commit per release.
+
+### Added
+- Site in Catalan and Spanish, with a language switcher and per-language share preview images.
+- Cover image at the top of the README.
+- `BRANCHING.md` and a Release workflow: pull requests go to `dev`; a release squashes `dev` into
+  one tagged commit on `main`, publishes the GitHub release and redeploys the site.
+
+### Fixed
+- Share preview image on the site; README back to the logo header.
+
 ## 0.4.0 — 2026-11-14
 
 ### Added
