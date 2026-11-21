@@ -14,11 +14,15 @@
       "gh pr list *": "allow",
       "gh pr checks *": "allow",
       "gh pr diff *": "allow",
+      "gh pr status*": "allow",
       "gh issue view *": "allow",
       "gh issue list *": "allow",
       "gh run list *": "allow",
       "gh run view *": "allow",
+      "gh run watch *": "allow",
       "gh repo view *": "allow",
+      "gh workflow list *": "allow",
+      "gh workflow view *": "allow",
       // No blanket allow for `gh api`: any -f/-F switches it from GET to POST.
       "gh api * --method GET *": "allow",
 
@@ -51,6 +55,18 @@
       "kill -9 *": "ask",
       "npm publish*": "ask",
       "<pm> publish*": "ask",
+      // Third-party code: always shown to the person before it lands on disk, even if a broader
+      // allow is added later (ask beats allow). The agent clones into .context/quarantine/, reads
+      // the files and summarizes what they run and reach first (root rule). Add the install
+      // commands of the tools this repo uses.
+      "claude mcp add *": "ask",
+      "claude plugin *": "ask",
+      "npx skills *": "ask",
+      "git clone *": "ask",
+      "uv tool install *": "ask",
+      "uv pip install *": "ask",
+      "pip install *": "ask",
+      "pipx install *": "ask",
 
       // --- deny: never, even with authorization ---
       // Approving a PR is always a human action (also enforced by the outward-writes hook).

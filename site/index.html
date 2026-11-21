@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>agentic-repo-kit — make any repo agent-ready</title>
-<meta name="description" content="A Claude Code skill that analyzes any repo and sets up a production-grade AI agent workflow: agents, skills, hooks, architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. It asks first, proposes with evidence, and generates only after your go.">
+<meta name="description" content="A Claude Code skill that analyzes any repo, designs the system to match its risk, picks the engineering concepts it needs and sets up the agent workflow that enforces them: agents, skills, hooks, architecture tests, lint, CI, permissions, MCPs and rulesync. It asks first, proposes with evidence, and generates only after your go.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="agentic-repo-kit — make any repo agent-ready">
-<meta property="og:description" content="A Claude Code skill that analyzes any repo and sets up a production-grade AI agent workflow: agents, skills, hooks, architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. It asks first, proposes with evidence, and generates only after your go.">
+<meta property="og:description" content="A Claude Code skill that analyzes any repo, designs the system to match its risk, picks the engineering concepts it needs and sets up the agent workflow that enforces them: agents, skills, hooks, architecture tests, lint, CI, permissions, MCPs and rulesync. It asks first, proposes with evidence, and generates only after your go.">
 <meta property="og:url" content="https://rwxce.github.io/agentic-repo-kit/">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://rwxce.github.io/agentic-repo-kit/og.png">
@@ -47,6 +47,11 @@
 .install-manual p{margin:0;padding:14px 20px;font-size:14px;color:var(--lp-muted)}
 .copy-cta .check-i,.hero-copy .check-i{display:none}.is-copied .copy-i{display:none}.is-copied .check-i{display:block}
 .nav-wrap{position:sticky;top:0;z-index:10;padding:16px clamp(.75rem,4vw,2.5rem) 0;display:flex;justify-content:center}
+/* Content scrolling under the sticky pill fades out instead of showing through the gap above it. */
+.nav-wrap::before{content:"";position:absolute;inset:0 0 -24px;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,var(--lp-bg) 0,var(--lp-bg) 55%,rgba(255,255,255,0) 100%)}
+/* Hero eyebrow: always one line; below 600px the size and tracking shrink to fit the longest locale (42 chars). */
+.eyebrow{margin:0;max-width:100%;font-family:var(--font-mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--lp-muted)}
+@media (max-width:600px){.eyebrow{font-size:min(12px,calc((100vw - 2.5rem) / 31));letter-spacing:.1em}}
 .nav{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:12px 20px;width:100%;max-width:880px;padding:6px 6px 6px 14px;background:var(--lp-nav-bg);border:1px solid var(--lp-line);border-radius:9999px;box-shadow:var(--lp-shadow-nav);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .nav-brand{display:inline-flex;align-items:center;gap:10px;min-width:0;font-family:var(--font-display);font-weight:900;font-size:17px;letter-spacing:-.03em;color:var(--lp-head);text-decoration:none;white-space:nowrap}
 .nav-brand img{flex-shrink:0;display:block;border-radius:8px}
@@ -84,6 +89,12 @@ a{color:#1622ee;text-underline-offset:4px}a:hover{color:#2a36ff;text-decoration:
 @media (max-width:1040px){.nav-links{display:none}}
 @media (max-width:600px){.nav-cta-long{display:none}.nav-cta-short{display:inline}}
 @media (max-width:500px){.nav{gap:8px;padding-left:10px}.nav-lang a{min-width:28px}.nav-cta{padding:0 14px}.nav-brand span{display:none}}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 0;margin:0;padding:0;list-style:none;font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;color:var(--lp-text)}
+.flow li{display:inline-flex;align-items:center;white-space:nowrap}
+.flow li+li::before{content:"\2192";margin:0 10px;color:var(--lp-muted)}
+.foot-links{display:flex;flex-wrap:wrap;gap:8px 20px}
+.foot-links a{color:rgba(255,255,255,0.85);text-decoration:none}
+.foot-links a:hover{color:#fff;text-decoration:underline}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -96,6 +107,7 @@ a{color:#1622ee;text-underline-offset:4px}a:hover{color:#2a36ff;text-decoration:
 <div class="nav-links">
 <a href="#why">Why</a>
 <a href="#how">How it works</a>
+<a href="#design">Design</a>
 <a href="#families">What it sets up</a>
 <a href="#faq">FAQ</a>
 </div>
@@ -106,9 +118,9 @@ a{color:#1622ee;text-underline-offset:4px}a:hover{color:#2a36ff;text-decoration:
 <section id="top" style="position: relative; padding: 88px clamp(1.25rem,4vw,2.5rem) 96px; overflow: hidden">
 <div aria-hidden="true" style="position: absolute; inset: 0; background-image: linear-gradient(var(--lp-line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--lp-line-soft) 1px, transparent 1px); background-size: 72px 72px; -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 70%); mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 70%)"></div>
 <div style="position: relative; max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 28px; text-align: center">
-<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--lp-muted)">A Claude Code skill · /repo-bootstrap</p>
+<p class="eyebrow">A Claude Code skill · /repo-bootstrap</p>
 <h1 style="margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(2.4rem,5.2vw,4.4rem); line-height: 1.04; letter-spacing: -0.05em; color: var(--lp-head); text-wrap: balance">Asks first. Proposes with evidence. Generates only after <span style="color: var(--lp-accent)">your go</span>.</h1>
-<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.6; color: var(--lp-body); text-wrap: pretty">Analyzes any repo and sets up a production-grade AI agent workflow: agents, skills, hooks, architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. For new and existing projects.</p>
+<p style="margin: 0; max-width: 720px; font-size: 18px; line-height: 1.6; color: var(--lp-body); text-wrap: pretty">Analyzes any repo, designs the system to match its risk, and sets up a production-grade AI agent workflow where every decision has a check: agents, skills, hooks, architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. For new and existing projects.</p>
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px">
 <a class="ark-cta hero-copy" href="#install" data-copy-target="agent-prompt" data-scroll-center style="display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 24px; border-radius: 9999px; background: var(--lp-accent); color: #fff; font-size: 15px; font-weight: 500; text-decoration: none; box-shadow: var(--lp-shadow-cta)"><svg class="copy-i" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><svg class="check-i" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span class="copy-label" data-done="Copied. Paste it in your agent">Copy the prompt for your agent</span></a>
 <a href="https://github.com/rwxce/agentic-repo-kit#readme" style="display: inline-flex; align-items: center; height: 44px; padding: 0 24px; border-radius: 9999px; border: 1px solid var(--lp-line-ink); background: var(--lp-card); color: var(--lp-text); font-size: 15px; font-weight: 500; text-decoration: none">Read the README</a>
@@ -156,37 +168,43 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 <div style="display: flex; flex-direction: column; gap: 20px; max-width: 860px">
 <p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-muted)">02 / How it works</p>
 <h2 style="margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(2.2rem,4.8vw,4.4rem); line-height: 0.98; letter-spacing: -0.045em; color: var(--lp-head); text-wrap: balance">Nothing is written until you say <span style="color: var(--lp-accent)">go</span>.</h2>
+<ol class="flow" aria-label="The flow"><li>understand</li><li>design</li><li>choose concepts</li><li>design controls</li><li>generate</li><li>verify</li><li>learn</li></ol>
 </div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 40px 32px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 40px 32px">
 <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
-<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Phase 0</p>
-<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Scan and ask</h3>
-<p style="margin: 0; color: var(--lp-body)">Scans the repo and shows an options menu: goal, families, tools, code style, depth and output.</p>
-</div>
-<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
-<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Mode</p>
-<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">New or existing</h3>
-<p style="margin: 0; color: var(--lp-body)">A clean project starts from the templates. An existing one gets a closer look first.</p>
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Phases 0–1</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Understand</h3>
+<p style="margin: 0; color: var(--lp-body)">Scans the repo and asks: goal, families, tools, code style, depth. A new project gets a short interview. An existing one gets parallel discovery lenses, a code-style decision and a big-feature benchmark in fresh contexts.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
-<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Existing repos</p>
-<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Discover and benchmark</h3>
-<p style="margin: 0; color: var(--lp-body)">Discovery lenses, a code-style decision, and a big-feature benchmark run in fresh contexts.</p>
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Phase 1b</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Design</h3>
+<p style="margin: 0; color: var(--lp-body)">A system design sized by risk: requirements, trust boundaries, risks, then 2–4 alternatives compared on checkable criteria. One ADR per decision. On a new project, the design waits for your go too.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
 <p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Phase 4</p>
-<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Propose with evidence</h3>
-<p style="margin: 0; color: var(--lp-body)">A proposal with file:line evidence for every artifact. Then it waits for your go.</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Choose concepts</h3>
+<p style="margin: 0; color: var(--lp-body)">Signals in the repo point to concept cards, such as webhooks, migrations or backups. A card is dropped when its &ldquo;when not&rdquo; matches your repo.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Phase 4</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Design controls</h3>
+<p style="margin: 0; color: var(--lp-body)">Every decision and concept becomes a check: a hook, a lint rule, a test or a CI step, with file:line evidence. Then it waits for your go.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
 <p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Phase 5</p>
-<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Generate PRs</h3>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Generate</h3>
 <p style="margin: 0; color: var(--lp-body)">Parallel subagents turn the approved proposal into pull requests.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
 <p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Phase 6</p>
-<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Verify for real</h3>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Verify</h3>
 <p style="margin: 0; color: var(--lp-body)">Tests, real hook triggers, CI runs, benchmark re-runs and adversarial review.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--lp-line-ink)">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Afterwards</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Learn</h3>
+<p style="margin: 0; color: var(--lp-body)">The installed reflect skill turns your corrections into checks that fail on the mistake. Prose rules are the last resort.</p>
 </div>
 </div>
 
@@ -207,17 +225,49 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 </div>
 </section>
 
+<section id="design" style="padding: 104px clamp(1.25rem,4vw,2.5rem); border-top: 1px solid var(--lp-line)">
+<div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; flex-direction: column; gap: 20px; max-width: 860px">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-muted)">03 / Design and concepts</p>
+<h2 style="margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(2.2rem,4.8vw,4.4rem); line-height: 0.98; letter-spacing: -0.045em; color: var(--lp-head); text-wrap: balance">Every decision names <span style="color: var(--lp-accent)">the check that holds it</span>.</h2>
+<p style="margin: 0; font-size: 18px; color: var(--lp-body); text-wrap: pretty">Before it proposes a single hook, the kit works out what your project needs and how each choice will be enforced. Depth follows risk: a local CLI gets one page, a SaaS with payments gets threat modeling.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 28px; background: var(--lp-soft); border: 1px solid var(--lp-line); border-radius: 14px">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">System design</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Sized by risk</h3>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Light, standard or deep, picked from what discovery found. Each open decision gets 2–4 alternatives compared on criteria anyone can re-check: maintenance activity, license, CVEs of the exact version, breaking changes, modelled cost and lock-in. Never stars or scores out of 10. Each decision becomes an ADR with an &ldquo;Enforced by&rdquo; line. On an existing repo it writes down the real design with file:line and proposes a migration only with evidence and your go.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 28px; background: var(--lp-soft); border: 1px solid var(--lp-line); border-radius: 14px">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Concept catalog</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">51 concepts, loaded on demand</h3>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">From webhooks and schema migrations to connection pooling, sagas, backups with a tested restore and SLOs. Each card says when it applies, when it doesn&rsquo;t, and the check that verifies it. A signal table maps what the repo shows to the cards worth opening. Cards not yet proven in production say so, and their checks are proposed as something to validate.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 28px; background: var(--lp-soft); border: 1px solid var(--lp-line); border-radius: 14px">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Recommended tools</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Third-party, through quarantine</h3>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Skills, CLIs and MCP servers the kit proposes but does not bundle, each with its origin, the version tested and its license. Before any install it reads their files, tells you what they run and what they can reach, and waits for your OK.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 28px; background: var(--lp-soft); border: 1px solid var(--lp-line); border-radius: 14px">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Product modules</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Opt-in, only on a signal</h3>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Design (product and design docs, tokens, a UI inventory), legal (an inventory built from the code and questions for you), content and changelog, copy and translation glossary, product AI, plans as data, and a local dev launcher. Each one is offered only when the repo shows the surface it covers, with zero-dependency checks. The legal module never writes final legal text.</p>
+</div>
+</div>
+</div>
+</section>
+
 <section id="families" style="padding: 104px clamp(1.25rem,4vw,2.5rem); background: var(--lp-soft)">
 <div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
 <div style="display: flex; flex-direction: column; gap: 20px; max-width: 860px">
-<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-muted)">03 / What it can set up</p>
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-muted)">04 / What it can set up</p>
 <h2 style="margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(2.2rem,4.8vw,4.4rem); line-height: 0.98; letter-spacing: -0.045em; color: var(--lp-head); text-wrap: balance">Eleven families. Pick <span style="color: var(--lp-accent)">all or one</span>.</h2>
-<p style="margin: 0; font-size: 18px; color: var(--lp-body)">Works with Claude Code, Cursor, Codex CLI, OpenCode, Copilot, Gemini CLI and others, with rulesync as a single source or native files.</p>
+<p style="margin: 0; font-size: 18px; color: var(--lp-body)">Works with Claude Code, Cursor, Codex CLI, OpenCode, Copilot, Gemini CLI and others, with rulesync as a single source or native files. OpenCode gets shims for the hooks it can&rsquo;t run as they are.</p>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px">
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Root rules</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Plan before code, docs first, pinned dependencies, full-circle verification.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Plan before code, docs first, pinned dependencies, validation by use case at every step, full-circle verification.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Agents</h3>
@@ -225,31 +275,31 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Skills</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">plan-feature, verify-integration, reflect, debugging, pr-review.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">plan-feature, verify-integration, debugging, pr-review, and reflect, which turns repeated corrections into checks.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Hooks</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Outward-writes blocker, dangerous-command gate, lint on change, PR preflight.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Outward-writes blocker, dangerous-command gate, lint on change, PR preflight, a review seal bound to the diff&rsquo;s fingerprint, session handoff, a Unicode firewall.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Architecture tests</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Registry and filesystem sync, unique codes, i18n parity.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Registry and filesystem sync, unique codes, i18n parity, a layout guard that sweeps widths in a real browser.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Custom lint</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Layer boundaries, no cycles, SDK gateways, colocated tests.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Layer boundaries, no cycles, SDK gateways, colocated tests. Adapters for Swift, Kotlin, Python, Go, Rust and Dart.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">CI</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">AI-config sync, lint, typecheck and tests, parity checks, branch-policy guard.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">AI-config sync, lint, typecheck and tests, guard tests on every PR, a build of the real artifact, parity checks, branch-policy guard.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Automations</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Workspace setup, release promotion, vendored-skill version checks.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Workspace setup, a hardened release flow, Renovate with a minimum release age, vendored-skill version checks.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Permissions</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Deny, ask, allow layers for shell, secrets and outward actions.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Deny, ask, allow layers for shell, secrets and outward actions. Third-party installs always ask.</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">Registries</h3>
@@ -257,7 +307,7 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 </div>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--lp-card); border: 1px solid var(--lp-line); border-radius: 14px">
 <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--lp-head)">MCP servers</h3>
-<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Official servers with a prod and sandbox split. Proposed, never installed without approval.</p>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Official servers with a prod and sandbox split. Unpinned servers are flagged. Proposed, never installed without approval.</p>
 </div>
 </div>
 </div>
@@ -266,7 +316,7 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 <section id="faq" style="padding: 104px clamp(1.25rem,4vw,2.5rem)">
 <div style="max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px">
 <div style="display: flex; flex-direction: column; gap: 20px">
-<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-muted)">04 / Questions</p>
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-muted)">05 / Questions</p>
 <h2 style="margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(2.2rem,4.8vw,4.4rem); line-height: 0.98; letter-spacing: -0.045em; color: var(--lp-head)">Before you run it.</h2>
 </div>
 <div class="faq">
@@ -284,7 +334,15 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 </details>
 <details>
 <summary><span>Does it install MCP servers?</span><svg class="faq-chev" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
-<p>No. It proposes official servers with their install commands and waits for your OK on each one.</p>
+<p>No. It proposes official servers with their install commands and waits for your OK on each one. Third-party skills and tools go through a quarantine step first: it reads what they run and what they can reach before it asks.</p>
+</details>
+<details>
+<summary><span>Is it only for TypeScript repos?</span><svg class="faq-chev" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+<p>No. The templates use TypeScript as the reference, and the language adapters map each guard to the tools of Swift, Kotlin, Python, Go, Rust and Dart. The adapters are documented but have not been run end to end yet.</p>
+</details>
+<details>
+<summary><span>What license is it under?</span><svg class="faq-chev" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+<p>MIT. Templates adapted from other projects keep their credit, listed in <code>THIRD_PARTY.md</code>.</p>
 </details>
 </div>
 </div>
@@ -298,7 +356,7 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 </div>
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.22); font-family: var(--font-mono); font-size: 12px; color: rgba(255,255,255,0.85)">
 <span>rwxce/agentic-repo-kit</span>
-<a href="https://github.com/rwxce/agentic-repo-kit/blob/main/CHANGELOG.md" style="color: rgba(255,255,255,0.85); text-decoration: none">Changelog</a>
+<nav class="foot-links" aria-label="Project"><a href="https://github.com/rwxce/agentic-repo-kit/blob/main/CHANGELOG.md">Changelog</a><a href="https://github.com/rwxce/agentic-repo-kit/blob/main/CONTRIBUTING.md">Contributing</a><a href="https://github.com/rwxce/agentic-repo-kit/blob/main/SECURITY.md">Security</a><a href="https://github.com/rwxce/agentic-repo-kit/blob/main/LICENSE">MIT License</a></nav>
 </div>
 </div>
 </footer>

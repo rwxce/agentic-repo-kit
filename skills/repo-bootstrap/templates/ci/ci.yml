@@ -1,5 +1,6 @@
-# WHAT: Main CI workflow: frozen install, AI-config drift check, lint, typecheck, parity checks,
-#   PR preflight, tests (changed-only on PRs, full on pushes to the integration branch).
+# WHAT: Main CI workflow: frozen install, AI-config drift check, skill lint, lint, dependency
+#   families, typecheck, real deploy artifact, parity checks, PR preflight, tests (changed-only plus guard tests on PRs,
+#   full on pushes to the integration branch).
 # REPO SIGNAL: a lockfile, generated AI config (rulesync or similar), lint/typecheck/test scripts.
 # CONFIGURE: <integration-branch>, <package-manager> steps, and the `run --if-present` scripts you
 #   actually have. Steps whose script is missing are skipped, so the file is safe to adopt before the
@@ -24,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest # <or your faster runner label>
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Preflight and --changed need `git merge-base` against the base branch: a depth-1
           # checkout cannot compute it.
@@ -40,7 +41,7 @@ jobs:
 
       # pnpm shown. npm: drop corepack + use `npm ci`. yarn: `corepack enable` + `yarn install --immutable`.
       - run: corepack enable
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: ${{ steps.node.outputs.file }}
           cache: pnpm
@@ -52,7 +53,16 @@ jobs:
       # truth generates. Hand edits to generated files fail here instead of drifting silently.
       - run: pnpm run --if-present rulesync:check
 
+      # Skill frontmatter, size and description length (automations/check-skills.mjs).
+      - run: pnpm run --if-present check:skills
+
       - run: pnpm run --if-present lint
+
+      # Packages released together must stay on the same version: automated security PRs bump one
+      # package at a time (automations/check-dependency-families.mjs).
+      - run: pnpm run --if-present check:dependency-families
+      # Renovate and pnpm minimumReleaseAge must match (automations/check-release-age.mjs).
+      - run: pnpm run --if-present check:release-age
 
       # <CODEGEN HOOK> frameworks whose typecheck needs generated types (ORM client, API schema,
       # route types) run codegen here, BEFORE typecheck, against a throwaway local backend rather
@@ -61,9 +71,15 @@ jobs:
 
       - run: pnpm run --if-present typecheck
 
+      # Build the real artifact the deploy ships (ci/check-deploy-artifact.mjs): catches imports
+      # that only resolve after codegen and packages that break once bundled, which typecheck and
+      # unit tests never see. Runs after codegen.
+      - run: pnpm run --if-present check:deploy-artifact
+
       # Parity checks: each is a script that exits non-zero on drift (see ../arch-tests).
       - run: pnpm run --if-present check:i18n
       - run: pnpm run --if-present check:vendored
+      - run: pnpm run --if-present check:ui-inventory
 
       - name: Fetch branch refs for the preflight
         # actions/checkout fetches only the ref under test; `git fetch origin <b>` alone fills
@@ -98,6 +114,13 @@ jobs:
             fi
             # vitest: --changed <ref>. jest: --changedSince=<ref>. Both walk the module graph.
             pnpm exec vitest run --changed "origin/$BASE_REF"
+            # Guard tests read the repo from disk instead of importing what they watch, so
+            # --changed never selects them (e.g. a new page without its route registry entry).
+            # Run them on every PR; ci/list-guard-tests.mjs (copied to scripts/) finds them.
+            # An empty list makes vitest run everything: slower, never weaker.
+            if [ -f scripts/list-guard-tests.mjs ]; then
+              pnpm exec vitest run $(node scripts/list-guard-tests.mjs)
+            fi
           else
             # Full suite on push: --changed can miss a test broken indirectly (via a mock or a
             # dependency the module graph does not trace). This is the safety net.

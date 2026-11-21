@@ -1,0 +1,85 @@
+{
+  "$description": "TEMPLATE design tokens in the DTCG format (Design Tokens Format Module 2025.10). Replace every value with the project's own; keep the structure valid with check-tokens.mjs. Remove this description.",
+  "color": {
+    "$type": "color",
+    "brand": {
+      "primary": {
+        "$value": { "colorSpace": "srgb", "components": [0.086, 0.133, 0.933], "hex": "#1622ee" },
+        "$description": "The one primary action per view, focus ring, links."
+      }
+    },
+    "ink": {
+      "default": { "$value": { "colorSpace": "srgb", "components": [0.055, 0.067, 0.188], "hex": "#0e1130" } },
+      "muted": { "$value": { "colorSpace": "srgb", "components": [0.42, 0.435, 0.533], "hex": "#6b6f88" } }
+    },
+    "canvas": { "$value": { "colorSpace": "srgb", "components": [0.957, 0.961, 0.984], "hex": "#f4f5fb" } },
+    "surface": { "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#ffffff" } },
+    "focus": { "$value": "{color.brand.primary}" }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": { "$value": ["Inter", "system-ui", "sans-serif"] }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": { "$value": 400 },
+      "bold": { "$value": "bold" }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "body": { "$value": { "value": 0.875, "unit": "rem" } },
+    "title": { "$value": { "value": 1.0625, "unit": "rem" } },
+    "tracking-tight": { "$value": { "value": -0.02, "unit": "rem" } },
+    "tracking-none": { "$value": { "value": 0, "unit": "rem" } }
+  },
+  "radius": {
+    "$type": "dimension",
+    "control": { "$value": { "value": 10, "unit": "px" } },
+    "card": { "$value": { "value": 24, "unit": "px" } }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": { "$value": { "value": 150, "unit": "ms" } }
+    },
+    "ease": {
+      "$type": "cubicBezier",
+      "out": { "$value": [0, 0, 0.2, 1] }
+    }
+  },
+  "shadow": {
+    "card": {
+      "$type": "shadow",
+      "$value": {
+        "color": { "colorSpace": "srgb", "components": [0.055, 0.067, 0.188], "alpha": 0.22 },
+        "offsetX": { "value": 0, "unit": "px" },
+        "offsetY": { "value": 18, "unit": "px" },
+        "blur": { "value": 40, "unit": "px" },
+        "spread": { "value": -26, "unit": "px" }
+      }
+    }
+  },
+  "typography": {
+    "$type": "typography",
+    "title": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{size.title}",
+        "fontWeight": "{font.weight.bold}",
+        "letterSpacing": "{size.tracking-tight}",
+        "lineHeight": 1.3
+      }
+    },
+    "body": {
+      "$value": {
+        "fontFamily": "{font.family.sans}",
+        "fontSize": "{size.body}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{size.tracking-none}",
+        "lineHeight": 1.5
+      }
+    }
+  }
+}
