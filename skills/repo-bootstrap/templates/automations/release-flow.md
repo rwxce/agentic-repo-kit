@@ -216,7 +216,7 @@ jobs:
         run: |
           [ -n "$KEY" ] || { echo "missing deploy key in the Stage environment" >&2; exit 1; }
           case "$KEY" in *"$STAGE_TARGET"*) ;; *) echo "key does not target staging" >&2; exit 1;; esac
-      - uses: actions/setup-node@v5      # no shared package cache in this job
+      - uses: actions/setup-node@v6      # no shared package cache in this job
         with: { node-version-file: .nvmrc }
       # - <install>, <backend deploy>, <run and wait for migrations>
 
@@ -344,7 +344,7 @@ jobs:
         run: |
           now=$(gh api "repos/$REPO/git/ref/heads/<main>" --jq .object.sha)
           [ "$now" = "$(git rev-parse HEAD)" ] || { echo "main moved to $now; refusing" >&2; exit 1; }
-      - uses: actions/setup-node@v5      # no cache: this job holds production secrets
+      - uses: actions/setup-node@v6      # no cache: this job holds production secrets
         with: { node-version-file: .nvmrc }
       # - <install>, then the deploys in contract order (rule 21), migrations last
       - name: Smoke test + deployed-commit check
