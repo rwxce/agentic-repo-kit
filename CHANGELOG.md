@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- `references/recommended-tools.md`: third-party skills, tools and MCP servers the kit proposes
+  but does not bundle. Each row gives the need, origin repo, version tested, license and the repo
+  overrides. It describes the quarantine step to follow before any install and flags MCP servers
+  run at `@latest` or unpinned as a risk. It also adds language adapters (lint rule +
+  architecture test) for Swift, Kotlin, Python, Go, Rust and Dart, with official links. Linked
+  from `SKILL.md` Phase 4.
+
 ## 0.4.0 — 2026-11-14
 
 ### Added

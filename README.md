@@ -140,7 +140,8 @@ The full catalog, with the failure behind each item, is in
 skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
   references/              loaded on demand: options menu, discovery lenses, code style,
-                           benchmark, decision matrix, guardrail catalog, MCP discovery, rulesync
+                           benchmark, decision matrix, guardrail catalog, MCP discovery, rulesync,
+                           recommended tools
   templates/               rules, agents, skills, commands, registries, hooks (+ tests),
                            arch tests, lint, CI, automations
 ```
