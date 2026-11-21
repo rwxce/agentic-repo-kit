@@ -12,6 +12,16 @@
 - `THIRD_PARTY.md` (root, site assets) and `skills/repo-bootstrap/THIRD_PARTY.md` (adapted
   templates, with the license texts; it travels with every install).
 
+### Changed
+- Site (en, ca, es) presents the new kit work: "How it works" follows the flow understand →
+  design → choose concepts → design controls → generate → verify → learn; a new "Design and
+  concepts" section covers the risk-sized system design, the concept catalog and the recommended
+  third-party tools installed through quarantine; the families list adds the review seal, reflect
+  with checks, guard tests, the hardened release, handoff, the Unicode firewall, the real build
+  artifact, the layout guard, Renovate with a minimum release age, OpenCode shims and the language
+  adapters; two new FAQ entries (other languages, license); the footer links CONTRIBUTING,
+  SECURITY and LICENSE; meta and share descriptions follow the new pitch.
+
 ### Fixed
 - Attribution restored where templates adapt someone else's work: `diagram-picker.md` ("Mermaid
   Studio" by Felipe Rodrigues / Tech Leads Club, CC BY 4.0, with the license link and the list of
