@@ -43,6 +43,7 @@ Every hook ships with tests; hooks run in CI tests like any other code.
 | UI surfaces inventory | a new page or overlay missing from the inventory (responsive reviews start incomplete), or rows citing deleted files | many pages and overlays; responsive bugs on unchecked sizes | `arch-tests/ui-surfaces-inventory.mjs` + `registries/ui-surfaces.md` |
 | i18n key parity | locales drifting from the source locale | >1 locale | `arch-tests/i18n-parity.mjs` |
 | Job-leak guard (test setup) | a test leaving scheduled jobs pending, hidden by global fake timers or surfacing later as a flake in an unrelated file | in-memory test backends with a scheduler or queue; flakes that move between files | `test-guards/job-leak-guard.mjs` |
+| Layout guard (Playwright: overflow at fixed widths + width sweep) | horizontal scroll, text off screen or clipped, colliding nav controls, items flickering while resizing; none visible to jsdom | responsive UI, translated strings, collapsing nav | `test-guards/layout/` |
 | Review-routing policy | sensitive paths reviewed in the light lane; unknown authors passing | review lanes | `ci/review-routing/` |
 
 ## 3. Custom lint

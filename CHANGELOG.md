@@ -30,6 +30,10 @@ Templates brought up to date with the reference repo they were distilled from.
   completing gate -> issue -> ready.
 - `arch-tests/ui-surfaces-inventory.mjs` (+ test) and `registries/ui-surfaces.md`: every page and
   floating surface must be cited in the UI inventory, and the inventory may not cite deleted files.
+- `test-guards/layout/`: Playwright layout guard. `overflow.mjs` (+ test with a fake DOM) finds
+  horizontal scroll, off-screen or clipped text and colliding controls; `layout-overflow.spec.ts`
+  checks fixed widths x pages x locales, `layout-sweep.spec.ts` resizes 320 -> 1440 -> 320 in 20px
+  steps with a monotonic check for collapsible items.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
