@@ -8,6 +8,7 @@ import {
   DEFAULT_CONTEXT_THRESHOLD,
   extractPending,
   extractTranscriptState,
+  handoffInputFromOpencodeMessages,
   renderHandoff,
   runStatusCommand,
   shouldWarn,
@@ -48,6 +49,26 @@ describe('save-handoff: extractPending', () => {
   it('falls back to the tail', () => {
     assert.equal(extractPending('short answer'), 'short answer')
     assert.equal(extractPending(null), '')
+  })
+})
+
+describe('save-handoff: handoffInputFromOpencodeMessages', () => {
+  const msg = (role, parts, tokens) => ({ info: { role, ...(tokens ? { tokens } : {}) }, parts })
+  it('takes the last non-synthetic assistant text and its context size', () => {
+    const input = handoffInputFromOpencodeMessages(
+      [
+        msg('assistant', [{ type: 'text', text: 'old' }]),
+        msg('user', [{ type: 'text', text: 'go on' }]),
+        msg('assistant', [{ type: 'text', text: 'Pending: x' }, { type: 'text', text: 'ignored', synthetic: true }], { input: 10, cache: { read: 5, write: 1 } }),
+      ],
+      { sessionID: 's1', event: 'Stop' },
+    )
+    assert.deepEqual(input, { hook_event_name: 'Stop', session_id: 's1', last_assistant_text: 'Pending: x', context_tokens: 16 })
+  })
+  it('skips assistant messages with only tool parts and tolerates garbage', () => {
+    const input = handoffInputFromOpencodeMessages([msg('assistant', [{ type: 'text', text: 'real' }]), msg('assistant', [{ type: 'tool' }])], { sessionID: 's', event: 'PreCompact' })
+    assert.equal(input.last_assistant_text, 'real')
+    assert.deepEqual(handoffInputFromOpencodeMessages(null, { sessionID: 's', event: 'Stop' }), { hook_event_name: 'Stop', session_id: 's' })
   })
 })
 

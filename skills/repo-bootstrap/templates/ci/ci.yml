@@ -1,5 +1,5 @@
 # WHAT: Main CI workflow: frozen install, AI-config drift check, skill lint, lint, dependency
-#   families, typecheck, parity checks, PR preflight, tests (changed-only plus guard tests on PRs,
+#   families, typecheck, real deploy artifact, parity checks, PR preflight, tests (changed-only plus guard tests on PRs,
 #   full on pushes to the integration branch).
 # REPO SIGNAL: a lockfile, generated AI config (rulesync or similar), lint/typecheck/test scripts.
 # CONFIGURE: <integration-branch>, <package-manager> steps, and the `run --if-present` scripts you
@@ -61,6 +61,8 @@ jobs:
       # Packages released together must stay on the same version: automated security PRs bump one
       # package at a time (automations/check-dependency-families.mjs).
       - run: pnpm run --if-present check:dependency-families
+      # Renovate and pnpm minimumReleaseAge must match (automations/check-release-age.mjs).
+      - run: pnpm run --if-present check:release-age
 
       # <CODEGEN HOOK> frameworks whose typecheck needs generated types (ORM client, API schema,
       # route types) run codegen here, BEFORE typecheck, against a throwaway local backend rather
@@ -69,9 +71,15 @@ jobs:
 
       - run: pnpm run --if-present typecheck
 
+      # Build the real artifact the deploy ships (ci/check-deploy-artifact.mjs): catches imports
+      # that only resolve after codegen and packages that break once bundled, which typecheck and
+      # unit tests never see. Runs after codegen.
+      - run: pnpm run --if-present check:deploy-artifact
+
       # Parity checks: each is a script that exits non-zero on drift (see ../arch-tests).
       - run: pnpm run --if-present check:i18n
       - run: pnpm run --if-present check:vendored
+      - run: pnpm run --if-present check:ui-inventory
 
       - name: Fetch branch refs for the preflight
         # actions/checkout fetches only the ref under test; `git fetch origin <b>` alone fills

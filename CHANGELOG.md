@@ -11,6 +11,39 @@ Templates brought up to date with the reference repo they were distilled from.
   block table, standards to load, severity, finding format, final output). SKILL.md points to it.
 - `skills/reflect/references/checks.md`: the check ladder, red first, shrink-only baselines,
   expiring exceptions and prune mode.
+- `hooks/unicode-firewall.mjs` + `install-unicode-firewall.mjs` (+ test): machine-wide Claude Code
+  hook that strips Unicode Tags, bidi controls and stray zero-width characters from tool output,
+  blocks pasted prompts carrying them and warns on look-alike Latin words.
+- `ci/check-deploy-artifact.mjs` (+ test): builds the artifact the deploy ships with the deploy
+  tool's own bundler and options, and optionally runs a smoke entry from the built output, so an
+  import that only resolves after codegen or a package that breaks once bundled fails in CI.
+- `lint/lint-restrictions.lint.test.mjs`: guard test that lints snippets through the repo's real
+  ESLint config and fails when a restriction stops firing (a later block replaced the list, an
+  `ignores` glob exempted a path) or fires where it must stay allowed.
+- `test-guards/job-leak-guard.mjs` (+ test): test-setup safety net that fails the test leaving
+  scheduled jobs pending, instead of hiding the leak under global fake timers or letting it flake
+  an unrelated file later.
+- `ci/prune-stale-branches.yml`: weekly prune of closed-PR and PR-less stale remote branches,
+  never protected ones or ones with an open PR; lists only on manual runs unless `apply` is ticked.
+- `ci/mark-ready-contracts.mjs` (+ test): after the production migrations finish, labels each open
+  "Contract: <name>" issue whose migration succeeded `contract-ready` and comments once,
+  completing gate -> issue -> ready.
+- `arch-tests/ui-surfaces-inventory.mjs` (+ test) and `registries/ui-surfaces.md`: every page and
+  floating surface must be cited in the UI inventory, and the inventory may not cite deleted files.
+- `test-guards/layout/`: Playwright layout guard. `overflow.mjs` (+ test with a fake DOM) finds
+  horizontal scroll, off-screen or clipped text and colliding controls; `layout-overflow.spec.ts`
+  checks fixed widths x pages x locales, `layout-sweep.spec.ts` resizes 320 -> 1440 -> 320 in 20px
+  steps with a monotonic check for collapsible items.
+- `commands/pr-make.md`, `sync-dev.md`, `git-clean.md`: open a PR end to end (base guards,
+  precheck gate, review-seal warning, lane, mandatory diagram); merge the integration branch in
+  with a tagged stash and per-file conflict rules; delete unprotected branches and worktrees after
+  one go on an inventory table, with a SHA backup.
+- `automations/renovate.json5`, `pnpm-workspace.snippet.yaml` and `check-release-age.mjs` (+ test):
+  Renovate with exact pins, a 5-day minimum release age and grouped families; the same age as
+  pnpm's install-time gate; a CI check that fails when the two ages drift.
+- `hooks/opencode/agent-bash-guards.js` and `agent-handoff.js` (+ test): OpenCode plugin shims
+  that reject what the "ask" guards would ask about, and feed `save-handoff` the session's last
+  message and context size. `save-handoff.mjs` exports `handoffInputFromOpencodeMessages`.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
