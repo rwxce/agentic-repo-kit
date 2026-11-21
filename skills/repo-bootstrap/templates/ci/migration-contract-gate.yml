@@ -27,7 +27,7 @@ jobs:
   require-contract-issues:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         env:
           MIGRATIONS_FILE: <path/to/migrations-file>
           # Matches ADDED lines of the unified diff; group 1 is the migration name.

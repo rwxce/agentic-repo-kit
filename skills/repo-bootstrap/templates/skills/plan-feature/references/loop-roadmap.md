@@ -21,6 +21,10 @@ Every size gets one. Small work is a 1-2 row table in the same format.
 
 - **Branch topology:** independent items branch from `origin/<integration branch>`; dependent items stack on the
   previous branch. Each PR's base is that previous branch; retarget to `<integration branch>` as each merges.
+  The orchestration branch is local and never pushed: it only carries `docs/plans/<initiative>/`;
+  every item (and any rule, agent or skill change found along the way) branches from
+  `origin/<integration branch>`, and `<integration branch>` is merged back into the orchestration
+  branch after each merge (`plan-folder.md` → "Orchestration branch").
 - **Waves:** items touching disjoint files can run in parallel; stacked items run in order.
 
 ## 2. Pre-loop questions (step 11, before the "go")
@@ -41,6 +45,11 @@ Ask with the question tool, max 4 per round, as many rounds as needed. Each ques
 recommendation, which is the **default**. Record in the roadmap: answered → the decision;
 unanswered → "default applied, decide at the end". A question with no reasonable default blocks
 only its item.
+
+A **spike** is different: it never gets a default, it needs the user's OK for its id, and its row
+is always `Stops the loop? yes`. An item that depends on an unresolved critical hypothesis doesn't
+enter the loop (`evidence-and-spikes.md`): spikes are done before the "go". The loop is the
+exception to one session per theme (`pr-scope`): it suits items with no open hypothesis.
 
 ## 3. Start
 
@@ -76,11 +85,18 @@ Rules learnt the hard way:
 - Commit only the item's files; untracked files you didn't create are reported, not committed.
 - Check the recipient before every message to a running agent.
 - A stop condition (CI red after 2 attempts, plan doesn't fit the code, a question without a
-  default) blocks the item, records why, and the loop moves on.
+  default) blocks the item, records why, and the loop moves on. A spike without the user's OK is
+  different: it stops the whole loop.
 
 ## 5. Close
 
-1. Write the final report (below).
+When an initiative has several loops, every PR is titled `<ID> - <title> - Loop <n>/<total>`
+(e.g. `C3 - feat: show the plan tier on the account page - Loop 1/3`), and when a loop's code is
+done its summary goes in the body of the loop's PR that merges last: per PR, the use cases
+verified and not verified, and what is left of every loop.
+
+1. Write the final report (below). Closing the plan folder (`plan-folder.md`) is the roadmap's
+   last item, which depends on every other item, so the folder is never deleted while work remains.
 2. **Delete `<state dir>/<slug>-roadmap.md`**: everything worth keeping is in the report.
 3. `ScheduleWakeup` with `stop: true`.
 

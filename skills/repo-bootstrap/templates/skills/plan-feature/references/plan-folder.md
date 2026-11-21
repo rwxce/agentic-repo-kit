@@ -32,6 +32,12 @@ docs/plans/<initiative>/
   Any other name can never be closed, because the gate rejects the `Closes-plan:` line.
 - **Never merged to `<default branch>`:** a folder that only exists on an unmerged branch needs no
   marker when it is dropped.
+- **Orchestration branch:** the master plan's orchestrator keeps a local branch (e.g.
+  `<user>/<initiative>-orchestration`) that is never pushed and only ever carries
+  `docs/plans/<initiative>/`. Any other change (rules, agents, skills, code) goes on a new branch
+  from `origin/<default branch>` with its own PR. When one merges, merge `<default branch>` into
+  the orchestration branch. The plan notes reach `<default branch>` in a batched docs PR from a
+  fresh branch.
 - **Moving a folder** inside `docs/plans/` (from `a` to `b`) is a rename, not a closure: no
   marker, because the initiative continues.
 

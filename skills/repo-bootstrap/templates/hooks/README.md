@@ -28,7 +28,7 @@ text and always exit 0 (except `pr-preflight --strict`).
 | `session-start-status.mjs` | SessionStart | advisory | Starting to code on a fresh branch before planning; not knowing the code index state | A code index (graph, ctags, SCIP) and a plan-first convention | `INDEX_PATH`, `INDEX_BUILD_LOG`, `INDEX_CLI`, `INDEX_INSTALL_HINT`, `baseRefs`, `longLivedBranch`, `planNudge`, `index` (or `null`) |
 | `index-reminder.mjs` | PreToolUse `Grep\|Glob` | advisory, once per session | Blind grepping when a code index exists | Same index as above | `INDEX_PATH`, `INDEX_QUERY_HINT`, `markerPrefix` |
 | `index-refresh.mjs` | Stop | advisory | A code index going stale after edits, without paying its update cost on every turn | Same index as above | `indexDir`, `indexFile`, `updateCommand`, `sourceExt`, `timeoutMs` |
-| `save-handoff.mjs` | Stop + PreCompact | advisory | A new chat or a compacted session losing the branch state, the active plan and what was left pending | Long sessions; work picked up across chats or worktrees | `planDirs`, `pendingHeading`; env `HANDOFF_CONTEXT_TOKENS`, optional `HANDOFF_STATUS_CMD` |
+| `save-handoff.mjs` | Stop + PreCompact | advisory | A new chat or a compacted session losing the branch state, the active plan and what was left pending | Long sessions; work picked up across chats or worktrees | `planDir` (repo plans only; `plan.md` of the newest initiative wins), `pendingWords` (heading-shaped lines, last one wins); env `HANDOFF_CONTEXT_TOKENS`, optional `HANDOFF_STATUS_CMD`; reads `last_assistant_text` / `context_tokens` from stdin on hosts without a transcript |
 | `load-handoff.mjs` | SessionStart | advisory | Starting a session without reading the previous one's hand off | Same as above | `MAX_AGE_MS` |
 
 ### CLIs used by skills (not wired as hooks)
@@ -36,7 +36,32 @@ text and always exit 0 (except `pr-preflight --strict`).
 | Script | Usage | What it prevents |
 |---|---|---|
 | `pr-precheck-seal.mjs` | `node scripts/pr-precheck-seal.mjs check [base]` (exit 0 fresh, 1 stale/missing, 2 error) · `write [base]` | Re-running the pr-scope precheck on an unchanged diff, or skipping it after the diff changed. Fingerprint = working tree vs merge-base with `origin/<base>` (default `CONFIG.defaultBase`), so staging/committing the same change keeps it fresh |
-| `review-seal.mjs` | `node scripts/review-seal.mjs check [base]` · `write [base]` (same exit codes; imports `pr-precheck-seal.mjs`) | Opening a flow-sensitive PR with no independent (fresh-context) review of this exact diff. The reviewer writes it; `pr-preflight` (advisory) and the PR-creation command check it |
+| `review-seal.mjs` | `node scripts/review-seal.mjs check [base]` · `fingerprint [base]` (saves the exact diff to review) · `write [base] --expect <fp>` (refuses if the diff moved during the review; same exit codes; imports `pr-precheck-seal.mjs`) | Opening a flow-sensitive PR with no independent (fresh-context) review of this exact diff. The reviewer writes it; `pr-preflight` (advisory) and the PR-creation command check it |
+
+### Machine-wide hooks (installed outside the repo)
+
+| Script | Usage | What it prevents |
+|---|---|---|
+| `unicode-firewall.mjs` | UserPromptSubmit + PostToolUse `*` + PostToolUseFailure `*`, registered in `<config>/settings.json` (`<config>` = `$CLAUDE_CONFIG_DIR` or `~/.claude`) by `install-unicode-firewall.mjs` (dry run by default, `--write` to apply; idempotent, keeps other hooks, backs up settings) | A prompt injection hidden from the human but read by the model: Unicode Tags, bidi controls and stray zero-width characters are stripped from tool output (`updatedToolOutput`) and decoded for the model as data; a pasted prompt carrying Tags or bidi is blocked; Latin words disguised with Cyrillic/Greek look-alikes only warn. A failed tool's output cannot be rewritten, so it is only flagged. Fails open on internal errors, withholds output it cannot inspect |
+
+Why machine-wide: the threat comes with what the agent reads (web, issues, MCP output, third-party
+skills), in any repo. Keep the repo copy as the source and its tests in CI; never put raw invisible
+characters in the hook sources (build them from code points).
+
+### OpenCode plugins (`opencode/`)
+
+OpenCode runs plugins, not hook commands, and a plugin can only let a tool call through or reject
+it. Generated plugins (rulesync) honour blocking hooks but not `ask`, and pass no session data. Two
+hand-written shims close the gaps; copy them to `.opencode/plugins/` and keep `delete: false` in
+`rulesync.jsonc` so generation leaves them alone. Delete each once the generator covers its case.
+
+| Plugin | What it does | Needs |
+|---|---|---|
+| `agent-bash-guards.js` | Rejects a Bash call that `block-outward-writes` flags or that `guard-dangerous-commands` would `ask` about, with the reason; the agent must get the person to run it. Fails open if the scripts cannot load. | both scripts in `scripts/` |
+| `agent-handoff.js` | On idle (Stop) and before compaction, reads the session's messages through the OpenCode client and pipes `last_assistant_text` / `context_tokens` to `save-handoff.mjs` (`handoffInputFromOpencodeMessages`); skips subagent sessions; shows the context warning as a toast; capped at 10 s. Drop save-handoff from the generated OpenCode stop/preCompact lists so it runs once. | `save-handoff.mjs` in `scripts/` |
+
+`opencode-plugins.test.mjs` tests both with fakes of the OpenCode client and shell.
+`opencode/package.json` only lets the kit's tests load the `.js` files as ES modules; do not copy it.
 
 Skills referenced by name (`plan-feature`, `reflect`) are conventions: point `skill` at whatever
 your repo calls them, or drop the hook if you have none.

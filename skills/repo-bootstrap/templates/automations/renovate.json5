@@ -1,0 +1,43 @@
+// WHAT: Renovate config for an agent-heavy repo: exact pins, a minimum release age, a weekly window,
+//   one grouped PR for minor and patch updates, families that must move together grouped, security
+//   fixes outside the window.
+// REPO SIGNAL: a lockfile and dependencies nobody updates by hand; agents installing packages; SDK
+//   families (a CLI and its SDK, a framework and its plugins) that break when versions drift.
+// CONFIGURE: baseBranchPatterns (the integration branch PRs go to), timezone and schedule, the
+//   families in packageRules (EXAMPLES below), labels. Keep minimumReleaseAge equal to the package
+//   manager's gate (pnpm-workspace.snippet.yaml) so a bot PR never proposes a version the install
+//   would refuse; automations/check-release-age.mjs fails CI when they drift. JSON5 so the comments
+//   stay; Renovate reads renovate.json5 at the repo root.
+// Why the age gate: a compromised release is usually detected and pulled within days. Waiting N days
+//   means a malicious publish never reaches node_modules through an update PR or an agent install.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended"],
+  baseBranchPatterns: ["<integration-branch>"],
+  // Exact versions everywhere: a range lets the lockfile move without a reviewed PR.
+  rangeStrategy: "pin",
+  minimumReleaseAge: "5 days",
+  timezone: "<Area/City>",
+  schedule: ["before 6am on monday"],
+  prConcurrentLimit: 5,
+  prHourlyLimit: 2,
+  labels: ["dependencies"],
+  // Security fixes skip the schedule (they still honour minimumReleaseAge unless you override it).
+  vulnerabilityAlerts: { enabled: true, labels: ["security"] },
+  packageRules: [
+    {
+      description: "One weekly PR for every minor and patch update; majors keep one PR each",
+      matchUpdateTypes: ["minor", "patch"],
+      groupName: "all non-major dependencies",
+      groupSlug: "all-minor-patch",
+    },
+    // EXAMPLE family: packages released together must update together (pair with
+    // automations/check-dependency-families.mjs, which catches one-package security bumps).
+    {
+      description: "<sdk-family> CLI and SDK packages move together",
+      matchPackageNames: ["<sdk-cli>", "@<sdk-scope>/**"],
+      groupName: "<sdk-family>",
+      groupSlug: "<sdk-family>",
+    },
+  ],
+}

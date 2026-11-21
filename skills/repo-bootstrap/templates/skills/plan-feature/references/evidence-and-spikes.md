@@ -94,3 +94,5 @@ implementation. When this permission rule and any autonomy rule disagree, this o
 
 Update the hypothesis tag, record the evidence, say what changes in the plan, and return to the
 discussion. A `refuted` critical hypothesis reopens every decision that depended on it.
+
+<!-- Spike shape and evidence tagging draw on ideas from open-gsd/gsd-core, github/spec-kit and bmad-code-org/BMAD-METHOD (all MIT); the text is original. -->

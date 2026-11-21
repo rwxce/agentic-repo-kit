@@ -6,8 +6,10 @@
  * can pick the work up without anyone pasting the plan. Pair it with load-handoff.mjs.
  *
  * Writes: branch, sha, working-tree status, diffstat, the active plan file and the last
- * "pending / what's left" block of the agent's latest message (read from the transcript
- * Claude Code passes in `transcript_path`). Once per session, when the context passes
+ * "pending / what's left" block of the agent's latest message — read from the transcript
+ * Claude Code passes in `transcript_path`, or taken directly from `last_assistant_text` and
+ * `context_tokens` on hosts without a transcript file (a plugin for that host reads them from its
+ * session API and pipes them in). Once per session, when the context passes
  * HANDOFF_CONTEXT_TOKENS (default 100k), it tells the user the hand off is ready.
  *
  * Optional: set HANDOFF_STATUS_CMD to a shell command and it runs after each write with
@@ -20,7 +22,6 @@
 
 import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
-import { homedir } from "node:os"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
 
@@ -29,16 +30,28 @@ import { pathToFileURL } from "node:url"
 // ---------------------------------------------------------------------------------------------
 export const DEFAULT_CONTEXT_THRESHOLD = 100_000
 export const CONFIG = {
-  /** Where plans live; the newest file under 24 h old is recorded as the active plan. */
-  planDirs: (root) => [join(root, 'docs', 'plans'), join(homedir(), '.claude', 'plans')],
+  /**
+   * This repo's plan folder (see activePlan). Only the repo's: a per-user plans dir
+   * (e.g. ~/.claude/plans) is shared by every project and workspace, so it would point the next
+   * session at another repo's plan.
+   */
+  planDir: (root) => join(root, 'docs', 'plans'),
   planMaxAgeMs: 24 * 60 * 60 * 1000,
   pendingMaxChars: 2000,
-  /** Headings that open the "what's left" block of an agent message. Add your language's. */
-  pendingHeading: /^\s*(?:#{1,6}\s*|\*\*)?(?:Pending for you|What's left|Next steps|Open items|Open)\b/im,
+  /** Words that open the "what's left" block of an agent message. Add your language's. */
+  pendingWords: ["Pending for you", "What's left", "Next steps", "Open items"],
   /** Run after each write when set (see header). */
   statusCmdEnv: 'HANDOFF_STATUS_CMD',
 }
 // ---------------------------------------------------------------------------------------------
+
+const PENDING_WORDS = CONFIG.pendingWords.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")
+// Heading-shaped lines only (markdown heading, bold, or a line ending in a colon), so a sentence
+// that merely starts with one of the words is not mistaken for the block.
+const PENDING_HEADING = new RegExp(
+  `^[ \\t]*(?:#{1,6}[ \\t]*(?:${PENDING_WORDS})\\b[^\\n]*|\\*\\*(?:${PENDING_WORDS})\\b[^\\n]*|(?:${PENDING_WORDS})\\b[^\\n]*:[ \\t]*)$`,
+  "gim",
+)
 
 /** Last main-thread assistant text and context size from transcript JSONL lines. */
 export function extractTranscriptState(lines) {
@@ -71,9 +84,52 @@ export function extractTranscriptState(lines) {
 /** The pending block of the agent's message, or its tail when there is none. */
 export function extractPending(text) {
   if (!text) return ""
-  const match = CONFIG.pendingHeading.exec(text)
-  const block = match ? text.slice(match.index) : text.slice(-600)
+  // The last heading wins: the pending block closes the agent's message.
+  let last = null
+  for (const match of text.matchAll(PENDING_HEADING)) last = match
+  const block = last ? text.slice(last.index) : text.slice(-600)
   return block.trim().slice(0, CONFIG.pendingMaxChars)
+}
+
+/** Session state handed over directly by hosts that have no transcript file. */
+export function stateFromInput(input) {
+  return {
+    lastText:
+      typeof input?.last_assistant_text === "string" && input.last_assistant_text.trim() ? input.last_assistant_text : null,
+    contextTokens: Number.isFinite(input?.context_tokens) ? input.context_tokens : null,
+  }
+}
+
+/**
+ * The stdin payload for this script built from an OpenCode session's messages (OpenCode has no
+ * transcript file): the last assistant text and its context size. Used by the OpenCode plugin
+ * (opencode/agent-handoff.js); it lives here so it is unit-tested with the rest.
+ */
+export function handoffInputFromOpencodeMessages(messages, { sessionID, event }) {
+  const list = Array.isArray(messages) ? messages : []
+  let lastText = null
+  let contextTokens = null
+  for (let i = list.length - 1; i >= 0; i--) {
+    const { info, parts } = list[i] ?? {}
+    if (info?.role !== "assistant") continue
+    if (contextTokens === null && info.tokens) {
+      const t = info.tokens
+      const total = (t.input ?? 0) + (t.cache?.read ?? 0) + (t.cache?.write ?? 0)
+      if (total > 0) contextTokens = total
+    }
+    const text = (Array.isArray(parts) ? parts : [])
+      .filter((p) => p?.type === "text" && typeof p.text === "string" && !p.synthetic)
+      .map((p) => p.text)
+      .join("\n")
+    if (text.trim()) {
+      lastText = text
+      break
+    }
+  }
+  const input = { hook_event_name: event, session_id: sessionID }
+  if (lastText) input.last_assistant_text = lastText
+  if (contextTokens !== null) input.context_tokens = contextTokens
+  return input
 }
 
 export function shouldWarn({ contextTokens, threshold, alreadyWarned }) {
@@ -125,8 +181,9 @@ export function runStatusCommand(cmd, { status, file, cwd }) {
 export function statusLine({ branch, sha, pending }) {
   const first = (pending || "")
     .split("\n")
+    .filter((l) => !new RegExp(PENDING_HEADING.source, "i").test(l))
     .map((l) => l.replace(/^[\s#*>-]+/, "").trim())
-    .find((l) => l && !CONFIG.pendingHeading.test(l))
+    .find(Boolean)
   return `${branch}@${sha}${first ? `: ${first}` : ""}`.slice(0, 120)
 }
 
@@ -139,18 +196,52 @@ function git(root, args) {
   }
 }
 
-function newestFile(dirs) {
-  let best = null
-  for (const dir of dirs) {
-    if (!existsSync(dir)) continue
-    for (const name of readdirSync(dir)) {
-      const path = join(dir, name)
+/**
+ * The active plan under `dir`. Recency (last planMaxAgeMs) picks the initiative — the folder with
+ * the most recently edited file — and inside it `plan.md` wins over whatever was touched last
+ * (often `decisions.md` or a loop file), so the next session gets the roadmap and its invariants.
+ * A loose file directly under `dir` competes as its own candidate.
+ */
+export function activePlan(dir, now = Date.now()) {
+  const maxAge = CONFIG.planMaxAgeMs
+  const newestIn = (current, depth) => {
+    let best = null
+    if (!existsSync(current)) return best
+    for (const name of readdirSync(current)) {
+      const path = join(current, name)
       try {
         const s = statSync(path)
-        if (Date.now() - s.mtimeMs > CONFIG.planMaxAgeMs) continue
-        if (!best || s.mtimeMs > best.mtimeMs) best = { path, mtimeMs: s.mtimeMs }
+        const hit = s.isDirectory()
+          ? depth < 2
+            ? newestIn(path, depth + 1)
+            : null
+          : now - s.mtimeMs > maxAge
+            ? null
+            : { path, mtimeMs: s.mtimeMs }
+        if (hit && (!best || hit.mtimeMs > best.mtimeMs)) best = hit
       } catch {}
     }
+    return best
+  }
+
+  let best = null
+  if (!existsSync(dir)) return null
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name)
+    try {
+      const s = statSync(path)
+      let candidate = null
+      if (s.isDirectory()) {
+        const newest = newestIn(path, 1)
+        if (newest) {
+          const plan = join(path, "plan.md")
+          candidate = { path: existsSync(plan) ? plan : newest.path, mtimeMs: newest.mtimeMs }
+        }
+      } else if (now - s.mtimeMs <= maxAge) {
+        candidate = { path, mtimeMs: s.mtimeMs }
+      }
+      if (candidate && (!best || candidate.mtimeMs > best.mtimeMs)) best = candidate
+    } catch {}
   }
   return best?.path ?? null
 }
@@ -161,16 +252,17 @@ function run() {
     input = JSON.parse(readFileSync(0, "utf8"))
   } catch {}
 
-  const root = process.env.CLAUDE_PROJECT_DIR || git(process.cwd(), ["rev-parse", "--show-toplevel"]).trim()
+  // The cwd's checkout first, so a session inside a nested worktree writes that worktree's handoff.
+  const root = git(process.cwd(), ["rev-parse", "--show-toplevel"]).trim() || process.env.CLAUDE_PROJECT_DIR
   if (!root) return
 
   const branch = git(root, ["branch", "--show-current"])
   const sha = git(root, ["rev-parse", "--short", "HEAD"])
   const status = git(root, ["status", "--short"]).split("\n").slice(0, 30).join("\n")
   const diffstat = git(root, ["diff", "--shortstat", "HEAD"]).trim()
-  const plan = newestFile(CONFIG.planDirs(root))
+  const plan = activePlan(CONFIG.planDir(root))
 
-  let state = { lastText: null, contextTokens: null }
+  let state = stateFromInput(input)
   if (typeof input.transcript_path === "string" && existsSync(input.transcript_path)) {
     try {
       state = extractTranscriptState(readFileSync(input.transcript_path, "utf8").split("\n"))

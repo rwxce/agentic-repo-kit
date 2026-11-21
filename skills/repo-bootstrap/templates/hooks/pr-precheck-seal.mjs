@@ -52,7 +52,11 @@ export function sealFileName(branch) {
 /** Thrown when the base itself cannot be resolved — the only case a fetch can fix. */
 class BaseError extends Error {}
 
-export function computeFingerprint(root, base = CONFIG.defaultBase) {
+/**
+ * Snapshots the working tree into a throwaway index (the real index is never touched) and
+ * calls `fn({ mergeBase, tree, git })` with the merge-base and the snapshot tree id.
+ */
+export function withWorkingTreeSnapshot(root, base, fn) {
   let mergeBase
   try {
     mergeBase = git(root, ["merge-base", `origin/${base}`, "HEAD"])
@@ -60,7 +64,6 @@ export function computeFingerprint(root, base = CONFIG.defaultBase) {
     throw new BaseError(`cannot find a merge-base with origin/${base}`)
   }
 
-  // Snapshot the working tree without touching the real index.
   const scratch = mkdtempSync(join(tmpdir(), "pr-precheck-seal-"))
   try {
     const index = join(scratch, "index")
@@ -71,12 +74,21 @@ export function computeFingerprint(root, base = CONFIG.defaultBase) {
     // would make git refuse ("paths are ignored") whenever .context/ exists.
     git(root, ["add", "-A", "--", "."], env)
     const tree = git(root, ["write-tree"], env)
-    // Blob ids per changed path: content-addressed, and small even for large binaries.
-    const changes = git(root, ["diff-tree", "-r", "--no-renames", mergeBase, tree])
-    return createHash("sha256").update(changes).digest("hex")
+    return fn({ mergeBase, tree, git: (args) => git(root, args, env) })
   } finally {
     rmSync(scratch, { recursive: true, force: true })
   }
+}
+
+/** Fingerprint of a snapshot: blob ids per changed path (content-addressed, small for binaries). */
+export function fingerprintOf({ mergeBase, tree, git: run }) {
+  return createHash("sha256")
+    .update(run(["diff-tree", "-r", "--no-renames", mergeBase, tree]))
+    .digest("hex")
+}
+
+export function computeFingerprint(root, base = CONFIG.defaultBase) {
+  return withWorkingTreeSnapshot(root, base, fingerprintOf)
 }
 
 function run() {
