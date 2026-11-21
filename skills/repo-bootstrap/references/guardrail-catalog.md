@@ -74,6 +74,7 @@ Roll out as `warn`, flip to `error` once clean.
 | Branch-policy guard (`pull_request_target`) | PRs into release branches from the wrong source | release branches | `ci/branch-policy-guard.yml` |
 | Migration contract gate | schema removals without a tracked contract step | schema migrations | `ci/migration-contract-gate.yml` |
 | Contract issue on merge | a merged expand/migrate step whose contract (drop the old field) is never scheduled, so dead schema lives forever | schema migrations | `ci/contract-issue.yml` |
+| Contract ready after the prod migration | a contract issue left open long after its migration finished, or a destructive contract PR opened before the migration succeeded | schema migrations run by the production deploy | `ci/mark-ready-contracts.mjs` |
 | Plan-folder gate + stale check | multi-PR plan folders left behind after the initiative ships, or closed without promoting what must outlive them | `docs/plans/` initiatives | `ci/plan-folder/` |
 | Post-deploy smoke | a deploy that builds green but fails at runtime, shipped without anyone hitting it | deployed environments | `ci/smoke-deploy.yml` + `automations/smoke-deploy.mjs` |
 | Prune stale branches (weekly) | dead remote branches piling up (closed-PR heads, PR-less pushes) so nobody can tell what is live | many short-lived agent branches | `ci/prune-stale-branches.yml` |

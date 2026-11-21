@@ -25,6 +25,9 @@ Templates brought up to date with the reference repo they were distilled from.
   an unrelated file later.
 - `ci/prune-stale-branches.yml`: weekly prune of closed-PR and PR-less stale remote branches,
   never protected ones or ones with an open PR; lists only on manual runs unless `apply` is ticked.
+- `ci/mark-ready-contracts.mjs` (+ test): after the production migrations finish, labels each open
+  "Contract: <name>" issue whose migration succeeded `contract-ready` and comments once,
+  completing gate -> issue -> ready.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;

@@ -16,7 +16,7 @@ and skill files). Fill every `<placeholder>`; delete optional sections whose sig
 | `arch-tests/` | directory↔registry parity, route registry, content assets, unique codes, i18n parity | next to the code they guard |
 | `test-guards/` | `job-leak-guard.mjs` (+ test): fails the test that leaves scheduled jobs pending | test setup files |
 | `lint/` | `eslint.local-rules.mjs` (+ tests), `eslint.config.snippet.mjs`, `lint-restrictions.lint.test.mjs` (the restrictions still fire) | `eslint.config.*` |
-| `ci/` | `ci.yml`, `list-guard-tests.mjs`, `branch-policy-guard.yml`, `migration-contract-gate.yml`, `contract-issue.yml`, `smoke-deploy.yml`, `check-deploy-artifact.mjs`, `prune-stale-branches.yml`, `plan-folder/` (close check + gate + stale workflows), `review-routing/`, PR template, CODEOWNERS | `.github/` |
+| `ci/` | `ci.yml`, `list-guard-tests.mjs`, `branch-policy-guard.yml`, `migration-contract-gate.yml`, `contract-issue.yml`, `mark-ready-contracts.mjs`, `smoke-deploy.yml`, `check-deploy-artifact.mjs`, `prune-stale-branches.yml`, `plan-folder/` (close check + gate + stale workflows), `review-routing/`, PR template, CODEOWNERS | `.github/` |
 | `automations/` | `workspace-setup.sh`, `release-flow.md`, `check-vendored.mjs`, `check-skills.mjs`, `check-dependency-families.mjs`, `smoke-deploy.mjs`, `skill-routing.cases.json` (each + test) | `scripts/`, `.github/workflows/` |
 
 Run every zero-dependency test in this folder with:

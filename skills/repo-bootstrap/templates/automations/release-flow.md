@@ -347,6 +347,8 @@ jobs:
       - uses: actions/setup-node@v6      # no cache: this job holds production secrets
         with: { node-version-file: .nvmrc }
       # - <install>, then the deploys in contract order (rule 21), migrations last
+      # - wait for the migrations to finish, then flag the contract issues they unblock:
+      #   <print-migration-status-as-json> | node scripts/mark-ready-contracts.mjs   (issues: write)
       - name: Smoke test + deployed-commit check
         env: { SMOKE_URL: "<prod-url>", EXPECTED_SHA: "${{ github.sha }}" }
         run: node scripts/smoke-deploy.mjs "$SMOKE_URL"   # see contract below
