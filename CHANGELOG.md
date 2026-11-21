@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### Added
+- `LICENSE` (MIT), `SECURITY.md` (private reporting through GitHub security advisories, scope, no
+  SLA), `CONTRIBUTING.md` (issue first for big changes, Conventional Commits, how to run the
+  template tests and the skill lint, attribution rule, contributions under MIT without CLA or DCO)
+  and `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1).
+- `.github/`: bug report and feature request issue templates, issue `config.yml` (security link, blank
+  issues off) and a pull request template.
+- `THIRD_PARTY.md` (root, site assets) and `skills/repo-bootstrap/THIRD_PARTY.md` (adapted
+  templates, with the license texts; it travels with every install).
+
+### Fixed
+- Attribution restored where templates adapt someone else's work: `diagram-picker.md` ("Mermaid
+  Studio" by Felipe Rodrigues / Tech Leads Club, CC BY 4.0, with the license link and the list of
+  changes), `debugging` (addyosmani/agent-skills, MIT) and `evidence-and-spikes.md` (ideas from
+  gsd-core, spec-kit and BMAD-METHOD). The templates index now says attribution comments stay in
+  the generated file.
+- Site (en, ca, es): the hero eyebrow stays on one line on phones, and content scrolling under the
+  sticky pill navbar fades out instead of showing through the gap above it.
 Templates brought up to date with the reference repo they were distilled from.
 
 ### Added
