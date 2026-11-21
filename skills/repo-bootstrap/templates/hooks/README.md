@@ -36,7 +36,7 @@ text and always exit 0 (except `pr-preflight --strict`).
 | Script | Usage | What it prevents |
 |---|---|---|
 | `pr-precheck-seal.mjs` | `node scripts/pr-precheck-seal.mjs check [base]` (exit 0 fresh, 1 stale/missing, 2 error) · `write [base]` | Re-running the pr-scope precheck on an unchanged diff, or skipping it after the diff changed. Fingerprint = working tree vs merge-base with `origin/<base>` (default `CONFIG.defaultBase`), so staging/committing the same change keeps it fresh |
-| `review-seal.mjs` | `node scripts/review-seal.mjs check [base]` · `write [base]` (same exit codes; imports `pr-precheck-seal.mjs`) | Opening a flow-sensitive PR with no independent (fresh-context) review of this exact diff. The reviewer writes it; `pr-preflight` (advisory) and the PR-creation command check it |
+| `review-seal.mjs` | `node scripts/review-seal.mjs check [base]` · `fingerprint [base]` (saves the exact diff to review) · `write [base] --expect <fp>` (refuses if the diff moved during the review; same exit codes; imports `pr-precheck-seal.mjs`) | Opening a flow-sensitive PR with no independent (fresh-context) review of this exact diff. The reviewer writes it; `pr-preflight` (advisory) and the PR-creation command check it |
 
 Skills referenced by name (`plan-feature`, `reflect`) are conventions: point `skill` at whatever
 your repo calls them, or drop the hook if you have none.
