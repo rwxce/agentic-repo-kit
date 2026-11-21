@@ -144,7 +144,7 @@ skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
   references/              loaded on demand: options menu, discovery lenses, system design,
                            code style, benchmark, decision matrix, guardrail catalog,
-                           MCP discovery, rulesync
+                           MCP discovery, rulesync, recommended tools
   templates/               system design + ADR, rules, agents, skills, commands, registries,
                            hooks (+ tests), arch tests, lint, CI, automations
 ```
