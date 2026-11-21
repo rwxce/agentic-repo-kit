@@ -14,6 +14,9 @@ Templates brought up to date with the reference repo they were distilled from.
 - `hooks/unicode-firewall.mjs` + `install-unicode-firewall.mjs` (+ test): machine-wide Claude Code
   hook that strips Unicode Tags, bidi controls and stray zero-width characters from tool output,
   blocks pasted prompts carrying them and warns on look-alike Latin words.
+- `ci/check-deploy-artifact.mjs` (+ test): builds the artifact the deploy ships with the deploy
+  tool's own bundler and options, and optionally runs a smoke entry from the built output, so an
+  import that only resolves after codegen or a package that breaks once bundled fails in CI.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
