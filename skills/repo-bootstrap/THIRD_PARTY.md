@@ -13,7 +13,8 @@ attribution comment in the generated file (see `templates/README.md`).
 | `templates/skills/interview-me/SKILL.md` | `skills/interview-me` in [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills), © 2025 Addy Osmani | MIT (text below) | The skill's method and much of its structure | Adapted as a template with repo-specific probes |
 | `templates/skills/plan-feature/references/evidence-and-spikes.md` | Ideas from [`open-gsd/gsd-core`](https://github.com/open-gsd/gsd-core), [`github/spec-kit`](https://github.com/github/spec-kit) and [`bmad-code-org/BMAD-METHOD`](https://github.com/bmad-code-org/BMAD-METHOD) | MIT (each project) | Ideas only: the spike shape and evidence tagging | No text copied; credited as a courtesy |
 
-Everything else in the skill is original to this project. The `rulesync` schema URLs in
+Everything else in the skill is original to this project and released under the MIT License
+(`LICENSE` at the root of https://github.com/rwxce/agentic-repo-kit). The `rulesync` schema URLs in
 `templates/rulesync/` and `references/rulesync.md` point at
 [`dyoshikawa/rulesync`](https://github.com/dyoshikawa/rulesync); nothing from it is copied.
 

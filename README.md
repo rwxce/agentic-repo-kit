@@ -5,7 +5,7 @@
 <h1 align="center">agentic-repo-kit</h1>
 
 <p align="center"><b>Asks first. Proposes with evidence. Generates only after your go.</b><br>
-<a href="https://rwxce.github.io/agentic-repo-kit/">Website</a> · <a href="#install">Install</a> · <a href="CHANGELOG.md">Changelog</a></p>
+<a href="https://rwxce.github.io/agentic-repo-kit/">Website</a> · <a href="#install">Install</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="LICENSE">MIT License</a></p>
 
 Analyze any repo and set up a production-grade AI agent workflow: agents, skills, hooks,
 architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. **Asks first, proposes
@@ -171,3 +171,12 @@ that handle money, auth or personal data.
 
 **Does it install MCP servers?** No. It proposes official servers with their install commands and
 waits for your OK on each one.
+
+## Contributing, security and license
+
+- How to propose changes, run the checks and credit third-party material:
+  [`CONTRIBUTING.md`](CONTRIBUTING.md). Participation follows the
+  [Code of Conduct](CODE_OF_CONDUCT.md).
+- Found a vulnerability? Report it privately as described in [`SECURITY.md`](SECURITY.md).
+- Released under the [MIT License](LICENSE). Third-party material keeps its own license:
+  [`THIRD_PARTY.md`](THIRD_PARTY.md).

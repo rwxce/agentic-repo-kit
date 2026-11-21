@@ -5,6 +5,12 @@
 Listed in [`skills/repo-bootstrap/THIRD_PARTY.md`](skills/repo-bootstrap/THIRD_PARTY.md), with the
 license texts. It lives inside the skill folder so it travels with every install.
 
+## In the repository root
+
+| File | Source | License | Changes |
+|---|---|---|---|
+| `CODE_OF_CONDUCT.md` | [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html) 2.1 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Contact placeholder filled with this repo's GitHub advisory and issue links; attribution section kept |
+
 ## In the site (`site/`)
 
 | Asset | Source | License | How it ships |

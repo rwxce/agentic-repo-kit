@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- `LICENSE` (MIT), `SECURITY.md` (private reporting through GitHub security advisories, scope, no
+  SLA), `CONTRIBUTING.md` (issue first for big changes, Conventional Commits, how to run the
+  template tests and the skill lint, attribution rule, contributions under MIT without CLA or DCO)
+  and `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1).
+- `.github/`: bug report and feature request issue templates, issue `config.yml` (security link, blank
+  issues off) and a pull request template.
 - `THIRD_PARTY.md` (root, site assets) and `skills/repo-bootstrap/THIRD_PARTY.md` (adapted
   templates, with the license texts; it travels with every install).
 
