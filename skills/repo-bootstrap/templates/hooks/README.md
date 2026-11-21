@@ -48,6 +48,21 @@ Why machine-wide: the threat comes with what the agent reads (web, issues, MCP o
 skills), in any repo. Keep the repo copy as the source and its tests in CI; never put raw invisible
 characters in the hook sources (build them from code points).
 
+### OpenCode plugins (`opencode/`)
+
+OpenCode runs plugins, not hook commands, and a plugin can only let a tool call through or reject
+it. Generated plugins (rulesync) honour blocking hooks but not `ask`, and pass no session data. Two
+hand-written shims close the gaps; copy them to `.opencode/plugins/` and keep `delete: false` in
+`rulesync.jsonc` so generation leaves them alone. Delete each once the generator covers its case.
+
+| Plugin | What it does | Needs |
+|---|---|---|
+| `agent-bash-guards.js` | Rejects a Bash call that `block-outward-writes` flags or that `guard-dangerous-commands` would `ask` about, with the reason; the agent must get the person to run it. Fails open if the scripts cannot load. | both scripts in `scripts/` |
+| `agent-handoff.js` | On idle (Stop) and before compaction, reads the session's messages through the OpenCode client and pipes `last_assistant_text` / `context_tokens` to `save-handoff.mjs` (`handoffInputFromOpencodeMessages`); skips subagent sessions; shows the context warning as a toast; capped at 10 s. Drop save-handoff from the generated OpenCode stop/preCompact lists so it runs once. | `save-handoff.mjs` in `scripts/` |
+
+`opencode-plugins.test.mjs` tests both with fakes of the OpenCode client and shell.
+`opencode/package.json` only lets the kit's tests load the `.js` files as ES modules; do not copy it.
+
 Skills referenced by name (`plan-feature`, `reflect`) are conventions: point `skill` at whatever
 your repo calls them, or drop the hook if you have none.
 

@@ -100,6 +100,38 @@ export function stateFromInput(input) {
   }
 }
 
+/**
+ * The stdin payload for this script built from an OpenCode session's messages (OpenCode has no
+ * transcript file): the last assistant text and its context size. Used by the OpenCode plugin
+ * (opencode/agent-handoff.js); it lives here so it is unit-tested with the rest.
+ */
+export function handoffInputFromOpencodeMessages(messages, { sessionID, event }) {
+  const list = Array.isArray(messages) ? messages : []
+  let lastText = null
+  let contextTokens = null
+  for (let i = list.length - 1; i >= 0; i--) {
+    const { info, parts } = list[i] ?? {}
+    if (info?.role !== "assistant") continue
+    if (contextTokens === null && info.tokens) {
+      const t = info.tokens
+      const total = (t.input ?? 0) + (t.cache?.read ?? 0) + (t.cache?.write ?? 0)
+      if (total > 0) contextTokens = total
+    }
+    const text = (Array.isArray(parts) ? parts : [])
+      .filter((p) => p?.type === "text" && typeof p.text === "string" && !p.synthetic)
+      .map((p) => p.text)
+      .join("\n")
+    if (text.trim()) {
+      lastText = text
+      break
+    }
+  }
+  const input = { hook_event_name: event, session_id: sessionID }
+  if (lastText) input.last_assistant_text = lastText
+  if (contextTokens !== null) input.context_tokens = contextTokens
+  return input
+}
+
 export function shouldWarn({ contextTokens, threshold, alreadyWarned }) {
   return !alreadyWarned && typeof contextTokens === "number" && contextTokens >= threshold
 }

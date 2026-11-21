@@ -41,6 +41,9 @@ Templates brought up to date with the reference repo they were distilled from.
 - `automations/renovate.json5`, `pnpm-workspace.snippet.yaml` and `check-release-age.mjs` (+ test):
   Renovate with exact pins, a 5-day minimum release age and grouped families; the same age as
   pnpm's install-time gate; a CI check that fails when the two ages drift.
+- `hooks/opencode/agent-bash-guards.js` and `agent-handoff.js` (+ test): OpenCode plugin shims
+  that reject what the "ask" guards would ask about, and feed `save-handoff` the session's last
+  message and context size. `save-handoff.mjs` exports `handoffInputFromOpencodeMessages`.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
