@@ -14,6 +14,8 @@
   checks). Every source URL was checked; cards with no primary source say "None found".
 - `decision-matrix.md`: a "Project signal → concepts" table.
 - `guardrail-catalog.md`: "When not" and "Origin" columns on every table.
+- `tests/concept-catalog.test.mjs`: guard test that fails when a card loses a field, is missing
+  from the index or the signal table, or has a broken relative link (`node --test tests/*.test.mjs`).
 
 ## 0.5.0 — 2026-11-21
 

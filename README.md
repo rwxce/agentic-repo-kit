@@ -158,6 +158,14 @@ Node's built-in runner:
 node --test skills/repo-bootstrap/templates/**/*.test.mjs
 ```
 
+A guard test checks the concept catalog (every card has its eight fields, is listed in
+`concept-catalog.md`, is reachable from the decision-matrix signal table, and has no broken
+relative links):
+
+```bash
+node --test tests/*.test.mjs
+```
+
 ## FAQ
 
 **Does it work without rulesync?** Yes. Choose "native files only" in Phase 0, and it writes
