@@ -9,6 +9,7 @@
   run at `@latest` or unpinned as a risk. It also adds language adapters (lint rule +
   architecture test) for Swift, Kotlin, Python, Go, Rust and Dart, with official links. Linked
   from `SKILL.md` Phase 4.
+- CI workflow (`ci.yml`): template tests, the kit's guard tests and the skill lint on every pull request and push to `dev`.
 
 ## 0.5.0 — 2026-11-21
 
