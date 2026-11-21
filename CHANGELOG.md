@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Phase 1b, system design (`references/system-design.md`): sized by risk (light · standard ·
+  deep) with a method picker, so a local CLI gets one page and a SaaS with payments gets threat
+  modeling and FMEA. New projects go brief → observable requirements → context and trust
+  boundaries → risks and hypothesis gate → 2-4 alternatives on checkable criteria (maintenance
+  activity, license, CVEs of the exact version, breaking changes, modelled cost, lock-in; never
+  stars or scores out of 10) → ADRs → "go". Existing projects document the real design from
+  discovery lenses 1, 4 and 5, list risks, and migrate only with evidence.
+- Official sources per project type (Android, iOS, Flutter, Kotlin Multiplatform, SaaS web,
+  CLI/library), each URL checked to resolve.
+- Templates `system-design.md` and `adr.md`: every decision names the check that enforces it,
+  and those checks feed the Phase 4 proposal.
+- Four system design scenarios in `benchmark.md`, including a CLI that must receive nothing
+  superfluous.
+
+### Changed
+- Flow: understand → design → propose → generate → verify → learn. `SKILL.md`, the README
+  diagram and the templates index include the new phase.
+
 ## 0.4.0 — 2026-11-14
 
 ### Added

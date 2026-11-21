@@ -78,11 +78,14 @@ You can also just say "make this repo agent-ready" or "audit my agents and skill
 flowchart TD
   S["/repo-bootstrap"] --> Q["Phase 0: light scan + full options menu<br/>(you choose goal, mode, families, tools, style, depth)"]
   Q --> M{"Mode"}
-  M -->|new / clean| I["Short interview → templates"]
+  M -->|new / clean| I["Phase 1: short interview"]
   M -->|existing| D["Phase 1: parallel discovery lenses<br/>(stack, sensitive flows, dev workflow,<br/>external services, architecture, config audit)"]
-  D --> C["Phase 2: code style — follow it,<br/>or a behavior-preserving refactor plan"]
+  C["Phase 2: code style — follow it,<br/>or a behavior-preserving refactor plan"]
+  D --> SD
+  I --> SD["Phase 1b: system design sized by risk<br/>new: requirements → trust boundaries → risks →<br/>2-4 alternatives on checkable criteria → ADRs → 'go'<br/>existing: real design, risks, migrate only with evidence"]
+  SD -->|existing| C
+  SD -->|new| P
   C --> B["Phase 3: big-feature benchmark in fresh contexts<br/>→ seeds the side-effect registry"]
-  I --> P
   B --> P["Phase 4: proposal with evidence (file:line)<br/>+ Clarifications → waits for 'go'"]
   P --> G["Phase 5: generate PR by PR,<br/>parallel subagents with exclusive file scopes"]
   G --> V["Phase 6: verify — tests, real hook triggers,<br/>CI run, benchmark re-run, adversarial review"]
@@ -139,10 +142,11 @@ The full catalog, with the failure behind each item, is in
 ```
 skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
-  references/              loaded on demand: options menu, discovery lenses, code style,
-                           benchmark, decision matrix, guardrail catalog, MCP discovery, rulesync
-  templates/               rules, agents, skills, commands, registries, hooks (+ tests),
-                           arch tests, lint, CI, automations
+  references/              loaded on demand: options menu, discovery lenses, system design,
+                           code style, benchmark, decision matrix, guardrail catalog,
+                           MCP discovery, rulesync
+  templates/               system design + ADR, rules, agents, skills, commands, registries,
+                           hooks (+ tests), arch tests, lint, CI, automations
 ```
 
 ## Developing
