@@ -29,6 +29,9 @@ The script templates have no dependencies; you only need a recent Node.js.
 # Template tests (hooks, CI scripts, automations, lint rules) with Node's built-in runner
 node --test skills/repo-bootstrap/templates/**/*.test.mjs
 
+# Kit guard tests (the concept catalog: fields, index, signal table, links)
+node --test tests/*.test.mjs
+
 # Skill lint on the shipped skill (frontmatter, name, description)
 node skills/repo-bootstrap/templates/automations/check-skills.mjs skills
 ```

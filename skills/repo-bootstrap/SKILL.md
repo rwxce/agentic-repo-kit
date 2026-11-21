@@ -133,6 +133,10 @@ plausibly need (touches data + auth + money/external service + UI + copy/legal).
 Map signals to artifacts with `references/decision-matrix.md` (plus the checks named by the Phase 1b
 ADRs) and pick concrete pieces from
 `references/guardrail-catalog.md`, `references/mcp-discovery.md` and `references/rulesync.md`.
+For engineering concepts (auth boundary, webhooks, jobs, migrations, pooling, backups, SLOs…),
+use the matrix's "Project signal → concepts" table and open only the matching cards from
+`references/concept-catalog.md`; each card names the check that verifies it and when it does not
+apply. External cards are proposals to validate, not proven practice.
 Third-party skills, tools and MCP servers, plus lint and architecture-test tools for stacks other
 than TypeScript, come from `references/recommended-tools.md`. They are proposed, never bundled,
 and installed only through its quarantine step.
@@ -210,6 +214,7 @@ Migrating loose config into rulesync is an import with an audit table — nothin
 | `references/benchmark.md` | Phase 3; its system design scenarios when evaluating Phase 1b |
 | `references/decision-matrix.md` | Phase 4, mapping signals to artifacts |
 | `references/guardrail-catalog.md` | Phase 4, choosing concrete guardrails |
+| `references/concept-catalog.md` | Phase 4, only the concept cards a repo signal points to (`references/concepts/<slug>.md`) |
 | `references/mcp-discovery.md` | Phase 4, MCP family |
 | `references/rulesync.md` | Phase 4/5, when rulesync is chosen |
 | `references/recommended-tools.md` | Phase 4, third-party skills/tools/MCPs and non-TypeScript lint and architecture tests |

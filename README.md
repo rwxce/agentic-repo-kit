@@ -125,6 +125,9 @@ Nothing gets proposed without a signal in your repo that justifies it.
 
 The full catalog, with the failure behind each item, is in
 [`skills/repo-bootstrap/references/guardrail-catalog.md`](skills/repo-bootstrap/references/guardrail-catalog.md).
+The engineering concepts behind them (51 cards: problem, principle, when not, typical mistakes, the
+check that verifies it, canonical source, variants per stack) are indexed in
+[`skills/repo-bootstrap/references/concept-catalog.md`](skills/repo-bootstrap/references/concept-catalog.md).
 
 ## Principles
 
@@ -145,7 +148,8 @@ skills/repo-bootstrap/
   THIRD_PARTY.md           sources and licenses of adapted templates (travels with the skill)
   references/              loaded on demand: options menu, discovery lenses, system design,
                            code style, benchmark, decision matrix, guardrail catalog,
-                           MCP discovery, rulesync, recommended tools
+                           concept catalog (+ concepts/), MCP discovery, rulesync,
+                           recommended tools
   templates/               system design + ADR, rules, agents, skills, commands, registries,
                            hooks (+ tests), arch tests, test guards, lint, CI, automations
 ```
@@ -159,6 +163,14 @@ Node's built-in runner:
 
 ```bash
 node --test skills/repo-bootstrap/templates/**/*.test.mjs
+```
+
+A guard test checks the concept catalog (every card has its eight fields, is listed in
+`concept-catalog.md`, is reachable from the decision-matrix signal table, and has no broken
+relative links):
+
+```bash
+node --test tests/*.test.mjs
 ```
 
 ## FAQ

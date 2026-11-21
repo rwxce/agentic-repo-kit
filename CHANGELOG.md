@@ -3,6 +3,19 @@
 ## Unreleased
 
 ### Added
+- Concept catalog: `references/concept-catalog.md` indexes 51 concept cards under
+  `references/concepts/`, loaded on demand. Each card has problem, principle, when it applies,
+  when it doesn't, typical mistakes, the check that verifies it, canonical source and variants per
+  stack. 33 are generalized from the production project the kit came from; 18 are external
+  practice marked as not yet proven there (connection pooling, isolation levels, optimistic
+  concurrency, outbox, sagas, circuit breaker, dead-letter queues, timeouts and retries,
+  idempotent APIs, backups with a tested restore, SLOs and error budgets, SBOM and provenance,
+  secrets management, input validation, security headers, feature flags, observability, health
+  checks). Every source URL was checked; cards with no primary source say "None found".
+- `decision-matrix.md`: a "Project signal → concepts" table.
+- `guardrail-catalog.md`: "When not" and "Origin" columns on every table.
+- `tests/concept-catalog.test.mjs`: guard test that fails when a card loses a field, is missing
+  from the index or the signal table, or has a broken relative link (`node --test tests/*.test.mjs`).
 - `LICENSE` (MIT), `SECURITY.md` (private reporting through GitHub security advisories, scope, no
   SLA), `CONTRIBUTING.md` (issue first for big changes, Conventional Commits, how to run the
   template tests and the skill lint, attribution rule, contributions under MIT without CLA or DCO)
