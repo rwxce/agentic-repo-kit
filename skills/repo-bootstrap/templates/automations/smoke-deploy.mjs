@@ -8,7 +8,11 @@
  *   render graph of every route that reaches it. A GET catches that module-load failure; it does
  *   NOT exercise mutations or form posts.
  * CONFIGURE: CONFIG.checks (a health endpoint plus one page per locale/area that pulls in the
- *   heaviest server code), retry/timeout values.
+ *   heaviest server code), retry/timeout values, and CONFIG.authHeaders when a staging host sits
+ *   behind an access proxy (e.g. Cloudflare Access service tokens): each header is sent only when
+ *   its env var is set, so the same script runs against public and protected hosts. A proxy
+ *   answers an unauthenticated request with a redirect to its login, which `redirect: 'manual'`
+ *   turns into a failed check rather than a false pass.
  * Usage: node scripts/smoke-deploy.mjs <base-url>      e.g. http://localhost:3000
  */
 import { pathToFileURL } from 'node:url'
@@ -18,26 +22,42 @@ export const CONFIG = {
   retryAttempts: 3,
   retryBackoffMs: 1000,
   requestTimeoutMs: 10_000,
+  /** Header name → env var holding its value; sent only when every listed var is set. */
+  authHeaders: {
+    // 'CF-Access-Client-Id': 'CF_ACCESS_CLIENT_ID',
+    // 'CF-Access-Client-Secret': 'CF_ACCESS_CLIENT_SECRET',
+  },
 }
 
-async function fetchOnce(url, timeoutMs, fetchImpl) {
+/** Headers from CONFIG.authHeaders, all or nothing (a half-configured token is no token). */
+export function authHeadersFrom(env, map = CONFIG.authHeaders) {
+  const entries = Object.entries(map ?? {})
+  if (!entries.length || entries.some(([, name]) => !env[name])) return {}
+  return Object.fromEntries(entries.map(([header, name]) => [header, env[name]]))
+}
+
+async function fetchOnce(url, timeoutMs, fetchImpl, headers) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    return await fetchImpl(url, { signal: controller.signal, redirect: 'manual' })
+    return await fetchImpl(url, { signal: controller.signal, redirect: 'manual', headers })
   } finally {
     clearTimeout(timeout)
   }
 }
 
 /** Checks one path; resolves `{ path, ok, detail }`. `fetchImpl` and `sleep` are injectable for tests. */
-export async function checkWithRetry(baseUrl, path, { config = CONFIG, fetchImpl = fetch, sleep } = {}) {
+export async function checkWithRetry(
+  baseUrl,
+  path,
+  { config = CONFIG, fetchImpl = fetch, sleep, headers = authHeadersFrom(process.env, config.authHeaders) } = {},
+) {
   const wait = sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)))
   const url = new URL(path, baseUrl).toString()
   let detail = ''
   for (let attempt = 1; attempt <= config.retryAttempts; attempt++) {
     try {
-      const res = await fetchOnce(url, config.requestTimeoutMs, fetchImpl)
+      const res = await fetchOnce(url, config.requestTimeoutMs, fetchImpl, headers)
       if (res.status === 200) return { path, ok: true, detail: '200' }
       detail = String(res.status)
     } catch (error) {
