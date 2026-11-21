@@ -1,15 +1,17 @@
 import assert from 'node:assert/strict'
-import { existsSync, mkdtempSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, it } from 'node:test'
 import {
+  activePlan,
   DEFAULT_CONTEXT_THRESHOLD,
   extractPending,
   extractTranscriptState,
   renderHandoff,
   runStatusCommand,
   shouldWarn,
+  stateFromInput,
   statusLine,
 } from './save-handoff.mjs'
 import { makeRepo, put, runScript } from './_helpers.mjs'
@@ -38,6 +40,10 @@ describe('save-handoff: extractPending', () => {
   it('cuts from the pending heading', () => {
     const text = 'Done X.\n\n**Pending for you**\n- Merge the PR\n- Enable Pages'
     assert.equal(extractPending(text), '**Pending for you**\n- Merge the PR\n- Enable Pages')
+  })
+  it('takes the last heading-shaped line, not a sentence that starts with the words', () => {
+    const text = '## Next steps\n- old\n\nNext steps are unclear in prose.\n\n**Pending for you**\n- Merge'
+    assert.equal(extractPending(text), '**Pending for you**\n- Merge')
   })
   it('falls back to the tail', () => {
     assert.equal(extractPending('short answer'), 'short answer')
@@ -85,6 +91,7 @@ describe('save-handoff: CLI', () => {
     put(repo, { 'b.js': 'b\n' })
     const r = runScript('save-handoff.mjs', {
       stdin: JSON.stringify({ hook_event_name: 'PreCompact' }),
+      cwd: repo,
       env: { CLAUDE_PROJECT_DIR: repo, HANDOFF_STATUS_CMD: 'echo "$HANDOFF_STATUS" > .context/status.txt' },
     })
     assert.equal(r.status, 0)
@@ -95,6 +102,38 @@ describe('save-handoff: CLI', () => {
     assert.ok(existsSync(join(repo, '.context/status.txt')))
   })
   it('malformed stdin exits 0', () => {
-    assert.equal(runScript('save-handoff.mjs', { stdin: 'nope', env: { CLAUDE_PROJECT_DIR: makeRepo() } }).status, 0)
+    assert.equal(runScript('save-handoff.mjs', { stdin: 'nope', cwd: makeRepo(), env: { CLAUDE_PROJECT_DIR: makeRepo() } }).status, 0)
+  })
+})
+
+describe('save-handoff: stateFromInput', () => {
+  it('reads the text and context size a host hands over directly', () => {
+    assert.deepEqual(stateFromInput({ last_assistant_text: 'hi', context_tokens: 42 }), { lastText: 'hi', contextTokens: 42 })
+    assert.deepEqual(stateFromInput({ last_assistant_text: '  ', context_tokens: 'x' }), { lastText: null, contextTokens: null })
+    assert.deepEqual(stateFromInput(undefined), { lastText: null, contextTokens: null })
+  })
+})
+
+describe('save-handoff: activePlan', () => {
+  const touch = (path, ageMs, now) => {
+    mkdirSync(join(path, '..'), { recursive: true })
+    writeFileSync(path, 'x')
+    const t = (now - ageMs) / 1000
+    utimesSync(path, t, t)
+  }
+  it('picks the most recent initiative and prefers its plan.md', () => {
+    const now = Date.now()
+    const dir = mkdtempSync(join(tmpdir(), 'plans-'))
+    touch(join(dir, 'old', 'plan.md'), 3_600_000, now)
+    touch(join(dir, 'new', 'plan.md'), 7_200_000, now)
+    touch(join(dir, 'new', 'decisions.md'), 1_000, now)
+    assert.equal(activePlan(dir, now), join(dir, 'new', 'plan.md'))
+  })
+  it('ignores plans older than a day and a missing dir', () => {
+    const now = Date.now()
+    const dir = mkdtempSync(join(tmpdir(), 'plans-'))
+    touch(join(dir, 'stale.md'), 2 * 86_400_000, now)
+    assert.equal(activePlan(dir, now), null)
+    assert.equal(activePlan(join(dir, 'nope'), now), null)
   })
 })

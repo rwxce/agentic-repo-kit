@@ -37,7 +37,12 @@ function run() {
 
   const git = (args) =>
     execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim()
-  const root = process.env.CLAUDE_PROJECT_DIR || git(["rev-parse", "--show-toplevel"])
+  let root = process.env.CLAUDE_PROJECT_DIR
+  try {
+    // The cwd's checkout first, so a session inside a nested worktree reads that worktree's handoff.
+    root = git(["rev-parse", "--show-toplevel"]) || root
+  } catch {}
+  if (!root) return
   const file = join(root, ".context", "handoff.md")
   if (!existsSync(file)) return
 
