@@ -38,6 +38,9 @@ Templates brought up to date with the reference repo they were distilled from.
   precheck gate, review-seal warning, lane, mandatory diagram); merge the integration branch in
   with a tagged stash and per-file conflict rules; delete unprotected branches and worktrees after
   one go on an inventory table, with a SHA backup.
+- `automations/renovate.json5`, `pnpm-workspace.snippet.yaml` and `check-release-age.mjs` (+ test):
+  Renovate with exact pins, a 5-day minimum release age and grouped families; the same age as
+  pnpm's install-time gate; a CI check that fails when the two ages drift.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;

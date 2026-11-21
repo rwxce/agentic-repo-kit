@@ -61,6 +61,8 @@ jobs:
       # Packages released together must stay on the same version: automated security PRs bump one
       # package at a time (automations/check-dependency-families.mjs).
       - run: pnpm run --if-present check:dependency-families
+      # Renovate and pnpm minimumReleaseAge must match (automations/check-release-age.mjs).
+      - run: pnpm run --if-present check:release-age
 
       # <CODEGEN HOOK> frameworks whose typecheck needs generated types (ORM client, API schema,
       # route types) run codegen here, BEFORE typecheck, against a throwaway local backend rather

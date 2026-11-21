@@ -92,6 +92,7 @@ Roll out as `warn`, flip to `error` once clean.
 | Workspace setup script (deps, codegen, index in background, copy index from main checkout) | agents working without the index or generated code | worktree-based workflow | `automations/workspace-setup.sh` |
 | Release promotion (dev → stage → main, fast-forward, smoke test, deployed-commit check) | hotfixes lost, wrong commit deployed | multi-environment deploys | `automations/release-flow.md` |
 | Contract issue on migration merge | expand/migrate/contract never contracted | schema migrations | `ci/contract-issue.yml` + `automations/release-flow.md` |
+| Update bot with a release-age gate (Renovate + pnpm `minimumReleaseAge`, kept equal by `check-release-age`) | a compromised release reaching node_modules through a bot PR or an agent install before it is pulled; ranges moving the lockfile without review; bot PRs red because the install refuses their version | lockfile + agents running installs | `automations/renovate.json5`, `automations/pnpm-workspace.snippet.yaml`, `automations/check-release-age.mjs` |
 | Vendored-skill version check | stale or unpinned vendored skills | vendored skills | `automations/check-vendored.mjs` |
 | Code-index refresh on stop | stale index | code index | `hooks/index-refresh.mjs` |
 

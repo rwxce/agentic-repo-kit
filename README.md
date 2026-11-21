@@ -115,7 +115,7 @@ Nothing gets proposed without a signal in your repo that justifies it.
 | Architecture tests | directory ↔ registry parity · registry ↔ filesystem · content ↔ assets · unique codes · i18n parity · UI surfaces inventory · job-leak guard · layout guard (overflow + width sweep) |
 | Custom lint | layer boundaries · no cycles · SDK gateways (+ a test that they still fire) · native deps confined to one runtime · required colocated tests · catch must report · house wrappers |
 | CI | AI-config sync check · lint/typecheck/tests · real deploy artifact · parity checks · PR preflight · branch-policy guard · migration contract gate · contract issue on merge · contract ready after the prod migration · plan-folder gate and stale check · post-deploy smoke · review routing · stale-branch prune |
-| Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check · skill lint · skill-routing pack · dependency-family check |
+| Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check · skill lint · skill-routing pack · dependency-family check · Renovate + release-age gate (pnpm `minimumReleaseAge`) |
 | Permissions | deny → ask → allow layers for shell, secrets and outward actions |
 | Registries | side-effect registry · blueprint (inventory) · environment variables · use-case matrix · UI surfaces |
 | MCP servers | official servers for the services you use, with prod/sandbox split. Proposed only, never installed without your OK |
