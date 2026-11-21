@@ -139,11 +139,14 @@ The full catalog, with the failure behind each item, is in
 ```
 skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
+  THIRD_PARTY.md           sources and licenses of adapted templates (travels with the skill)
   references/              loaded on demand: options menu, discovery lenses, code style,
                            benchmark, decision matrix, guardrail catalog, MCP discovery, rulesync
   templates/               rules, agents, skills, commands, registries, hooks (+ tests),
                            arch tests, lint, CI, automations
 ```
+
+Third-party material and its licenses: [`THIRD_PARTY.md`](THIRD_PARTY.md).
 
 ## Developing
 

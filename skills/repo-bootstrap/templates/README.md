@@ -2,7 +2,10 @@
 
 Each template starts with a header comment: what it is, the repo signal that justifies it, and what
 to fill. Strip that header when writing the real file (frontmatter must be the first thing in agent
-and skill files). Fill every `<placeholder>`; delete optional sections whose signal is absent.
+and skill files). Attribution comments (`<!-- Adapted from … -->`, `<!-- … draw on ideas from … -->`)
+are not part of that header: keep them in the generated file. Sources and licenses are listed in
+[`../THIRD_PARTY.md`](../THIRD_PARTY.md), which travels with the skill when it is installed.
+Fill every `<placeholder>`; delete optional sections whose signal is absent.
 
 | Dir | Contents | Lands in the target repo as |
 |---|---|---|

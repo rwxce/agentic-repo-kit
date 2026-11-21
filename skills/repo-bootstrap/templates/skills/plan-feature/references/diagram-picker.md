@@ -1,6 +1,7 @@
 <!--
 TEMPLATE: plan-feature reference — which diagram answers which question. Include with
-plan-feature. Nothing to fill. Strip this comment when writing the file.
+plan-feature. Nothing to fill. Strip this comment when writing the file; keep the attribution
+comment at the end (CC BY 4.0 requires it).
 -->
 # Diagram picker
 
@@ -30,3 +31,5 @@ Rules:
 - Avoid `architecture-beta`: its docs warn of backwards-incompatible changes.
 - Viewers differ. GitHub renders Mermaid, a terminal shows raw text, so the surrounding text has
   to carry the meaning without it.
+
+<!-- Selection-matrix approach and density limits adapted from "Mermaid Studio" by Felipe Rodrigues / Tech Leads Club (https://github.com/tech-leads-club/agent-skills, packages/skills-catalog/skills/(tooling)/mermaid-studio), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Changed: reorganized around engineering questions, reduced to the types used here, theming rules removed. Keep this attribution comment in the generated file. -->
