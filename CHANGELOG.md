@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.5.0 — 2026-11-21
+
+Templates brought up to date with the reference repo they were distilled from.
+
+### Added
+- `ci/list-guard-tests.mjs` (+ test): finds tests that read the repo from disk, which changed-only
+  test runs never select; `ci.yml` runs them on every PR.
+- `skills/pr-review/references/pr-review.md`: the canonical review procedure (lane detection,
+  block table, standards to load, severity, finding format, final output). SKILL.md points to it.
+- `skills/reflect/references/checks.md`: the check ladder, red first, shrink-only baselines,
+  expiring exceptions and prune mode.
+
+### Changed
+- `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
+  `write --expect <fp>` refuses when the diff changed during the review. Fixes a race where edits
+  made while the review ran were sealed as reviewed. `pr-precheck-seal` exposes the shared
+  snapshot helpers.
+- `reflect`: proposes a check (type, lint rule, test, CI gate) before prose; class-level on the
+  second repeat; the check must fail on the original mistake; `/reflect prune`.
+- Root rule: validate each step by use case while building, findings recap in long runs,
+  quarantine for third-party installs, loops only from an approved roadmap, width sweep, the
+  dev-mode question, "keep implementing until the user reviews", corrections escalate to checks.
+- `plan-feature`: orchestration branch (local, never pushed), spikes never get a default and stop
+  the loop, multi-loop PR titles, closing the plan folder is the roadmap's last item.
+- `save-handoff` / `load-handoff`: active plan from the repo only (`plan.md` of the newest
+  initiative wins), pending block from the last heading-shaped line, input from hosts without a
+  transcript, nested worktrees resolve their own checkout.
+- Permissions: third-party installs (`git clone`, MCP/plugin/skill adds, pip/uv installs) are
+  `ask`; more read-only `gh` allows.
+- `release-flow.md`: hardened sketches (only from main, jobs split by secret, pinned environment
+  secrets, no caches next to prod secrets, re-run currency check, `--match-head-commit` plus tree
+  comparison, wait until staging serves the commit, `refs/gated` marker, one concurrency lock,
+  exact-sha deploys, deploy-failure issue).
+- `ci.yml`: guard tests on PRs, skill lint, dependency-family check.
+- `plan-reviewer`: hunts unproven assumptions and uncovered use-case states and transitions.
+- `verify-integration`: force use cases that do not happen on their own; width sweep.
+- `smoke-deploy`: optional env-fed auth headers for hosts behind an access proxy.
+- GitHub Actions bumped to Node 24 runtimes (checkout v5, setup-node v6, github-script v8).
+
 ## 0.4.0 — 2026-11-14
 
 ### Added
