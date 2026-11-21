@@ -76,6 +76,7 @@ Roll out as `warn`, flip to `error` once clean.
 | Contract issue on merge | a merged expand/migrate step whose contract (drop the old field) is never scheduled, so dead schema lives forever | schema migrations | `ci/contract-issue.yml` |
 | Plan-folder gate + stale check | multi-PR plan folders left behind after the initiative ships, or closed without promoting what must outlive them | `docs/plans/` initiatives | `ci/plan-folder/` |
 | Post-deploy smoke | a deploy that builds green but fails at runtime, shipped without anyone hitting it | deployed environments | `ci/smoke-deploy.yml` + `automations/smoke-deploy.mjs` |
+| Prune stale branches (weekly) | dead remote branches piling up (closed-PR heads, PR-less pushes) so nobody can tell what is live | many short-lived agent branches | `ci/prune-stale-branches.yml` |
 | Skill lint | skills with no description (never routed to) or oversized ones that cost context every session | own skills | `automations/check-skills.mjs` |
 | Skill-routing pack | a prompt-router regex or a skill description edit silently breaking which skill a request reaches | routing hooks + own skills | `automations/skill-routing.*` |
 | Dependency families | packages of one family drifting to mismatched versions that break at runtime | multi-package SDKs | `automations/check-dependency-families.mjs` |

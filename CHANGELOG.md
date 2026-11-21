@@ -23,6 +23,8 @@ Templates brought up to date with the reference repo they were distilled from.
 - `test-guards/job-leak-guard.mjs` (+ test): test-setup safety net that fails the test leaving
   scheduled jobs pending, instead of hiding the leak under global fake timers or letting it flake
   an unrelated file later.
+- `ci/prune-stale-branches.yml`: weekly prune of closed-PR and PR-less stale remote branches,
+  never protected ones or ones with an open PR; lists only on manual runs unless `apply` is ticked.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
