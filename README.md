@@ -113,7 +113,7 @@ Nothing gets proposed without a signal in your repo that justifies it.
 | Commands | `pr-triage` (each review comment: in scope or deferred) |
 | Hooks | outward-writes blocker (fail-closed) · protected-branch guard · dangerous-command gate with preview · feature-intent router · correction capture · session status · session hand off (save/load) · index reminder and refresh · lint if changed · env-docs parity · compliance tripwire · branch policy · PR preflight (+ independent-review seal notice) · Unicode firewall (machine-wide) |
 | Architecture tests | directory ↔ registry parity · registry ↔ filesystem · content ↔ assets · unique codes · i18n parity |
-| Custom lint | layer boundaries · no cycles · SDK gateways · native deps confined to one runtime · required colocated tests · catch must report · house wrappers |
+| Custom lint | layer boundaries · no cycles · SDK gateways (+ a test that they still fire) · native deps confined to one runtime · required colocated tests · catch must report · house wrappers |
 | CI | AI-config sync check · lint/typecheck/tests · real deploy artifact · parity checks · PR preflight · branch-policy guard · migration contract gate · contract issue on merge · plan-folder gate and stale check · post-deploy smoke · review routing |
 | Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check · skill lint · skill-routing pack · dependency-family check |
 | Permissions | deny → ask → allow layers for shell, secrets and outward actions |

@@ -56,6 +56,7 @@ Every hook ships with tests; hooks run in CI tests like any other code.
 | `must-use-wrapper` | raw API calls bypassing the house wrapper | house wrapper exists | local rules |
 | `registry-path-exists` | registry entries pointing to missing files | registries in code | local rules |
 | No literal UI strings / no console | untranslated UI, logs bypassing the logger | i18n / logger modules | snippet |
+| Restrictions-still-fire test | a later flat-config block replacing a restriction list, an `ignores` glob or a renamed folder silently switching a gateway rule off while lint stays green | restriction rules acting as gateways, more than one config block per file | `lint/lint-restrictions.lint.test.mjs` |
 
 Roll out as `warn`, flip to `error` once clean.
 

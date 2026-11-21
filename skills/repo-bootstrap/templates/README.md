@@ -14,7 +14,7 @@ and skill files). Fill every `<placeholder>`; delete optional sections whose sig
 | `rulesync/` | `rulesync.jsonc`, `permissions.jsonc`, `mcp.json` | repo root and `.rulesync/` |
 | `hooks/` | 15 hook scripts + 2 seal CLIs (`pr-precheck-seal`, `review-seal`) + the machine-wide Unicode firewall and its installer, `node:test` suites, `hooks.rulesync.json`, `settings.hooks.json`, README | `scripts/` + hook wiring (the firewall: `<config>/hooks/` via its installer) |
 | `arch-tests/` | directory↔registry parity, route registry, content assets, unique codes, i18n parity | next to the code they guard |
-| `lint/` | `eslint.local-rules.mjs` (+ tests), `eslint.config.snippet.mjs` | `eslint.config.*` |
+| `lint/` | `eslint.local-rules.mjs` (+ tests), `eslint.config.snippet.mjs`, `lint-restrictions.lint.test.mjs` (the restrictions still fire) | `eslint.config.*` |
 | `ci/` | `ci.yml`, `list-guard-tests.mjs`, `branch-policy-guard.yml`, `migration-contract-gate.yml`, `contract-issue.yml`, `smoke-deploy.yml`, `check-deploy-artifact.mjs`, `plan-folder/` (close check + gate + stale workflows), `review-routing/`, PR template, CODEOWNERS | `.github/` |
 | `automations/` | `workspace-setup.sh`, `release-flow.md`, `check-vendored.mjs`, `check-skills.mjs`, `check-dependency-families.mjs`, `smoke-deploy.mjs`, `skill-routing.cases.json` (each + test) | `scripts/`, `.github/workflows/` |
 

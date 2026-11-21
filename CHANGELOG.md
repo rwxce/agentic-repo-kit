@@ -17,6 +17,9 @@ Templates brought up to date with the reference repo they were distilled from.
 - `ci/check-deploy-artifact.mjs` (+ test): builds the artifact the deploy ships with the deploy
   tool's own bundler and options, and optionally runs a smoke entry from the built output, so an
   import that only resolves after codegen or a package that breaks once bundled fails in CI.
+- `lint/lint-restrictions.lint.test.mjs`: guard test that lints snippets through the repo's real
+  ESLint config and fails when a restriction stops firing (a later block replaced the list, an
+  `ignores` glob exempted a path) or fires where it must stay allowed.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
