@@ -1,0 +1,39 @@
+name: CI
+
+# Runs the kit's own checks on every pull request to dev and every push to dev: the template
+# test suites, the kit's guard tests (tests/, once present) and the skill lint.
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: 24
+      - name: Template tests
+        run: node --test "skills/repo-bootstrap/templates/**/*.test.mjs"
+      - name: Kit guard tests
+        run: |
+          shopt -s nullglob
+          files=(tests/*.test.mjs)
+          if [ ${#files[@]} -eq 0 ]; then echo "No kit guard tests yet."; exit 0; fi
+          node --test "${files[@]}"
+      - name: Skill lint
+        run: node skills/repo-bootstrap/templates/automations/check-skills.mjs skills

@@ -71,6 +71,31 @@ Templates brought up to date with the reference repo they were distilled from.
 - `verify-integration`: force use cases that do not happen on their own; width sweep.
 - `smoke-deploy`: optional env-fed auth headers for hosts behind an access proxy.
 - GitHub Actions bumped to Node 24 runtimes (checkout v5, setup-node v6, github-script v8).
+### Added
+- `references/recommended-tools.md`: third-party skills, tools and MCP servers the kit proposes
+  but does not bundle. Each row gives the need, origin repo, version tested, license and the repo
+  overrides. It describes the quarantine step to follow before any install and flags MCP servers
+  run at `@latest` or unpinned as a risk. It also adds language adapters (lint rule +
+  architecture test) for Swift, Kotlin, Python, Go, Rust and Dart, with official links. Linked
+  from `SKILL.md` Phase 4.
+- Phase 1b, system design (`references/system-design.md`): sized by risk (light · standard ·
+  deep) with a method picker, so a local CLI gets one page and a SaaS with payments gets threat
+  modeling and FMEA. New projects go brief → observable requirements → context and trust
+  boundaries → risks and hypothesis gate → 2-4 alternatives on checkable criteria (maintenance
+  activity, license, CVEs of the exact version, breaking changes, modelled cost, lock-in; never
+  stars or scores out of 10) → ADRs → "go". Existing projects document the real design from
+  discovery lenses 1, 4 and 5, list risks, and migrate only with evidence.
+- Official sources per project type (Android, iOS, Flutter, Kotlin Multiplatform, SaaS web,
+  CLI/library), each URL checked to resolve.
+- Templates `system-design.md` and `adr.md`: every decision names the check that enforces it,
+  and those checks feed the Phase 4 proposal.
+- Four system design scenarios in `benchmark.md`, including a CLI that must receive nothing
+  superfluous.
+
+### Changed
+- Flow: understand → design → propose → generate → verify → learn. `SKILL.md`, the README
+  diagram and the templates index include the new phase.
+- CI workflow (`ci.yml`): template tests, the kit's guard tests and the skill lint on every pull request and push to `dev`.
 
 ## 0.5.0 — 2026-11-21
 

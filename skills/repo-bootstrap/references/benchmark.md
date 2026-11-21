@@ -55,3 +55,19 @@ Score each planner: found / total, docs checked yes/no, tokens, time. Typical cl
   re-explores everything costs ~370k; feeding the reviewer the sweep tables and capping its tool
   calls brings it to an estimated 200-250k.
 - Quick depth skips the benchmark; the registry is then seeded from the catalog's generic rows.
+
+## System design scenarios (Phase 1b)
+
+Four briefs that test the design phase on its own, run like the planners above: fresh context,
+read-only, one subagent per scenario, given `references/system-design.md` and the brief. Score each
+row pass/fail; a scenario passes only when every "Must" holds and no "Must not" appears.
+
+| # | Brief | Must | Must not |
+|---|---|---|---|
+| D-1 | New B2B SaaS: invoicing for freelancers, card payments, stores client names and tax ids, EU customers | Standard or deep depth; trust boundaries for the payment webhook and the auth callback, each with replay handling; threat modeling and FMEA on the billing path; 2-4 alternatives for billing and auth with every criterion filled with a value and a source; modelled cost at launch and at 10x; one ADR per decision, each with **Enforced by**; stops for "go" | Stars, download counts or scores out of 10; a criterion without a source; schema or pins resting on an `assumed` critical hypothesis |
+| D-2 | New mobile app: field inspections offline for days, then sync; Android and iOS; team knows Kotlin | Offline and conflict behaviour as observable requirements; native, Kotlin Multiplatform and Flutter compared, at least one not named in the brief; sources taken from the official-sources table; a spike card for the sync hypothesis, not run without the user's OK for its id | A platform chosen before the sync hypothesis is `verified` or `accepted`; web-only advice (cookies, WCAG as the only accessibility source) |
+| D-3 | Existing repo whose README says "hexagonal" while lens 5 finds UI importing the database client, and lens 1 finds a framework version past end of support | Design documented as it is, with `file:line`; the README/code gap listed as a finding; retroactive ADRs only for load-bearing decisions; the end-of-support version as a risk with its evidence tag; any migration with a reversible path and "stay as is" among the alternatives | A rewrite proposal; a migration justified by taste; re-running discovery lenses instead of reusing them |
+| D-4 | New CLI: converts local Markdown files to PDF, no network, no accounts, one maintainer, distributed through one package registry | Light depth; one page; observable requirements for exit codes, stdin/stdout and `--help`; at most 1-3 ADRs (e.g. language and packaging), each with a check such as a CLI contract test or an OSV scan of dependencies; `Methods: none` or one method with its question | **Anything superfluous:** C4 level 2, threat model, LINDDUN, FMEA, cloud cost model, webhooks, rate limits, an observability stack, `docs/architecture/` or `docs/adr/` files nobody asked for, or Phase 4 rows (agents, hooks, CI) justified only by the design and not by a repo signal |
+
+Score: scenarios passed out of 4, plus for D-4 the count of superfluous artifacts (target 0). Keep
+the results next to the big-feature benchmark in `.context/repo-bootstrap/benchmark.md`.
