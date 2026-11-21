@@ -28,11 +28,11 @@ jobs:
     runs-on: ubuntu-latest # <or your faster runner label>
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
 
@@ -40,4 +40,7 @@ jobs:
         env:
           # The URL goes through env, never `${{ }}` inside the script.
           SMOKE_URL: ${{ inputs.url }}
+          # Optional: a host behind an access proxy needs its service token (CONFIG.authHeaders).
+          # CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          # CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
         run: node scripts/smoke-deploy.mjs "$SMOKE_URL"

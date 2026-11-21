@@ -46,8 +46,16 @@ not verified and why.
 3. A new event, property or vendor needs the root rule's `## Compliance` check before it is added.
    Exercise the failure path (service rejects or is unreachable) and the consent gate when one
    applies.
-4. Compare expected vs observed. If they differ, investigate before moving on (`debugging`).
-5. Clean up events, rows, runs and accounts you created.
+4. **Force the use cases that do not happen on their own.** Every row of the plan's use-case table
+   is exercised, not only the ones the happy path reaches. When a state does not show up by itself
+   (a failed job, an exhausted quota, a past date, legacy data, a retry), create it: through the
+   real path when one exists (e.g. complete a job as failed through its internal entry point, set a
+   profile field through the auth provider's API), otherwise with test data on dev. "Could not be
+   seen" is acceptable only when forcing the state is impossible or needs a permission you do not
+   have — then ask for it before reporting it as `not run`.
+5. Compare expected vs observed. If they differ, investigate before moving on (`debugging`).
+6. Clean up events, rows, runs and accounts you created (<the repo's test-account cleanup
+   command or skill, if any>).
 
 ## Service recipes
 
@@ -69,7 +77,19 @@ Whenever possible, show the change **and its variants**: mobile 375, tablet ~768
 every locale; relevant states (empty, loading, error, full; free vs paid; roles); hover/focus/open
 when it matters. Save under `<scratch dir>` and embed inline. Browser-engine-specific rendering
 bugs not reproducible in your automation browser must be confirmed by the user in the real
-browser. If a variant cannot be reached, say which and why.
+browser. A state that is not reachable by itself is forced first (step 3.4); only a variant that
+cannot be forced is reported, with which and why.
+
+**Width sweep (responsive or layout changes).** Fixed widths miss what breaks *between* them (an
+item that pops in and out, text crossing its neighbour mid-resize, a size that jumps). In the
+browser, load the page once and resize step by step — 320→1440 px every 20 px, then back down — at
+the top and scrolled, in the longest locales. At every step check: sizes stay constant, items only
+appear as the width grows (never disappear and come back), nothing overlaps or overflows. Take
+screenshots at the widths where something changes. The fixed 375/768/1440 shots are still
+required; the sweep does not replace them.
+<!-- optional: if the repo has an automated layout test (e.g. a Playwright spec that sweeps widths
+     and fails on overflow inside guarded containers), name it here and report its result next to
+     the screenshots; screenshots cover a couple of locales, the test covers the rest. -->
 
 ## Final message
 

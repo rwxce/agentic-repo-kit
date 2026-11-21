@@ -12,6 +12,10 @@ catch cross-cutting side effects, verify the full circle, and are fenced by dete
 Everything here was distilled from a real project where each piece was added after a concrete
 failure; the "why" of each piece lives in `references/guardrail-catalog.md`.
 
+**Flow:** understand (Phases 0-1) → design (Phase 1b) → propose (Phases 2-4) → generate (Phase 5)
+→ verify (Phase 6) → learn (the installed `reflect` skill turns later corrections into rules and
+checks).
+
 ## Non-negotiables
 
 1. **Ask first.** Phase 0 runs before any deep analysis. The user's choices scope everything after.
@@ -64,7 +68,8 @@ of Phase 2/3.
 Short interview (one question at a time, each with your guess attached) until you can predict the
 next three answers: product and users, stack (or candidates), sensitive domains (money, auth,
 personal data, external publishing, legal promises), team size and review model, tools used,
-deploy target, environments (dev/stage/prod, sandboxes). Then go to Phase 3 using templates.
+deploy target, environments (dev/stage/prod, sandboxes). Then go to Phase 1b, and after it to Phase 3
+using templates.
 
 ### Existing project
 Launch the discovery lenses **in parallel**, each a read-only subagent returning only a compact
@@ -80,6 +85,25 @@ table with `file:line` (prompts in `references/discovery.md`):
 
 Use a code index first if one exists (graph tool, ctags, LSP) and plain `rg` otherwise. Keep your own
 context small: synthesize tables, do not re-read what a lens already returned.
+
+## Phase 1b — System design
+
+Follow `references/system-design.md`. Skipped only when the goal is "only one family". Size the
+design by risk first (light · standard · deep) and pick only the methods that can change a
+decision; a local CLI gets one page, not a threat model.
+
+- **New project:** brief → observable requirements → context and trust boundaries → risks and
+  hypothesis gate → 2-4 alternatives per open decision, compared on checkable criteria
+  (maintenance activity, license, CVEs of the exact version, breaking changes, modelled cost,
+  lock-in; never stars or scores out of 10) → one ADR per decision, each naming the check that
+  enforces it → **wait for "go" on the design** before Phase 4.
+- **Existing project:** document the real design from lenses 1, 4 and 5 (as it is, with
+  `file:line`) → retroactive ADRs for load-bearing decisions only → risks from evidence → a
+  migration only with a verified risk, compared alternatives, a reversible path and the user's
+  "go".
+
+Drafts stay in `.context/repo-bootstrap/` (templates `system-design.md` and `adr.md`). Each ADR's
+**Enforced by** becomes a row of the Phase 4 proposal.
 
 ## Phase 2 — Code style decision (existing project, if chosen in Phase 0)
 
@@ -106,12 +130,16 @@ plausibly need (touches data + auth + money/external service + UI + copy/legal).
 
 ## Phase 4 — Proposal (the deliverable before "go")
 
-Map signals to artifacts with `references/decision-matrix.md` and pick concrete pieces from
+Map signals to artifacts with `references/decision-matrix.md` (plus the checks named by the Phase 1b
+ADRs) and pick concrete pieces from
 `references/guardrail-catalog.md`, `references/mcp-discovery.md` and `references/rulesync.md`.
 For engineering concepts (auth boundary, webhooks, jobs, migrations, pooling, backups, SLOs…),
 use the matrix's "Project signal → concepts" table and open only the matching cards from
 `references/concept-catalog.md`; each card names the check that verifies it and when it does not
 apply. External cards are proposals to validate, not proven practice.
+Third-party skills, tools and MCP servers, plus lint and architecture-test tools for stacks other
+than TypeScript, come from `references/recommended-tools.md`. They are proposed, never bundled,
+and installed only through its quarantine step.
 Write the proposal to `.context/repo-bootstrap/proposal.md` and summarize it in chat.
 
 Format — one table per chosen family, one row per artifact:
@@ -181,11 +209,13 @@ Migrating loose config into rulesync is an import with an audit table — nothin
 |---|---|
 | `references/options-menu.md` | Phase 0, to present the menu |
 | `references/discovery.md` | Phase 1, existing project |
+| `references/system-design.md` | Phase 1b, both modes |
 | `references/code-style.md` | Phase 2 |
-| `references/benchmark.md` | Phase 3 |
+| `references/benchmark.md` | Phase 3; its system design scenarios when evaluating Phase 1b |
 | `references/decision-matrix.md` | Phase 4, mapping signals to artifacts |
 | `references/guardrail-catalog.md` | Phase 4, choosing concrete guardrails |
 | `references/concept-catalog.md` | Phase 4, only the concept cards a repo signal points to (`references/concepts/<slug>.md`) |
 | `references/mcp-discovery.md` | Phase 4, MCP family |
 | `references/rulesync.md` | Phase 4/5, when rulesync is chosen |
+| `references/recommended-tools.md` | Phase 4, third-party skills/tools/MCPs and non-TypeScript lint and architecture tests |
 | `templates/README.md` | Phase 5, index of every template |

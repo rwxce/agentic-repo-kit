@@ -22,6 +22,16 @@ call at fault, and the message can say what to do instead. Write the message as 
 | `no-console` -> logger (snippet 4) | Unredacted, unmonitored output. | A logger module exists. | Exempt the logger/reporter and `scripts/`. |
 | `no-restricted-syntax` literal paths (snippet 5) | Hard-coded route/locale paths bypassing the registry. | A routes registry. | Build the locale alternation from the translation files. |
 
+## Guard test: the restrictions still fire
+
+`lint-restrictions.lint.test.mjs` lints snippets through the repo's real config (`ESLint.lintText`
+with a virtual path) and asserts each restriction reports exactly once where it is forbidden and
+not at all where it is allowed. It catches the silent failures of flat config: a later block
+replacing a `no-restricted-imports` list, an `ignores` glob exempting a directory, a renamed folder
+leaving a `files` glob matching nothing. Lint stays green in all three cases. It fails if a case
+path is ignored by the config (so `allowed` cannot pass vacuously). Fill `CASES`; it reads config
+from disk, so add it to the guard-test list (`ci/list-guard-tests.mjs`) or run it on every PR.
+
 ## Rollout
 
 1. Add the rule at `warn` in a PR of its own; count the findings (`eslint --format json | jq`).

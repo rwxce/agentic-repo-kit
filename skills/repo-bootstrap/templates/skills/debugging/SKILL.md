@@ -2,7 +2,8 @@
 TEMPLATE: debugging skill (root-cause protocol). Generate for any repo with tests and more than one
 runtime layer. Fill: the reproduce/evidence table with the repo's real layers and tools, and the
 "Known traps" list (start empty; grows from real incidents).
-Strip this comment when writing the file.
+Strip this comment when writing the file; keep the attribution comment below the frontmatter
+(MIT requires it).
 -->
 ---
 name: debugging
@@ -13,6 +14,8 @@ description: >-
   attempting any fix.
 targets: ["*"]
 ---
+
+<!-- Adapted from addyosmani/agent-skills (skills/debugging-and-error-recovery), MIT License © 2025 Addy Osmani. -->
 
 # Debugging
 

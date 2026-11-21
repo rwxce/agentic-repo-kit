@@ -5,7 +5,7 @@
 <h1 align="center">agentic-repo-kit</h1>
 
 <p align="center"><b>Asks first. Proposes with evidence. Generates only after your go.</b><br>
-<a href="https://rwxce.github.io/agentic-repo-kit/">Website</a> · <a href="#install">Install</a> · <a href="CHANGELOG.md">Changelog</a></p>
+<a href="https://rwxce.github.io/agentic-repo-kit/">Website</a> · <a href="#install">Install</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="LICENSE">MIT License</a></p>
 
 Analyze any repo and set up a production-grade AI agent workflow: agents, skills, hooks,
 architecture tests, lint guardrails, CI, permissions, MCPs and rulesync. **Asks first, proposes
@@ -78,11 +78,14 @@ You can also just say "make this repo agent-ready" or "audit my agents and skill
 flowchart TD
   S["/repo-bootstrap"] --> Q["Phase 0: light scan + full options menu<br/>(you choose goal, mode, families, tools, style, depth)"]
   Q --> M{"Mode"}
-  M -->|new / clean| I["Short interview → templates"]
+  M -->|new / clean| I["Phase 1: short interview"]
   M -->|existing| D["Phase 1: parallel discovery lenses<br/>(stack, sensitive flows, dev workflow,<br/>external services, architecture, config audit)"]
-  D --> C["Phase 2: code style — follow it,<br/>or a behavior-preserving refactor plan"]
+  C["Phase 2: code style — follow it,<br/>or a behavior-preserving refactor plan"]
+  D --> SD
+  I --> SD["Phase 1b: system design sized by risk<br/>new: requirements → trust boundaries → risks →<br/>2-4 alternatives on checkable criteria → ADRs → 'go'<br/>existing: real design, risks, migrate only with evidence"]
+  SD -->|existing| C
+  SD -->|new| P
   C --> B["Phase 3: big-feature benchmark in fresh contexts<br/>→ seeds the side-effect registry"]
-  I --> P
   B --> P["Phase 4: proposal with evidence (file:line)<br/>+ Clarifications → waits for 'go'"]
   P --> G["Phase 5: generate PR by PR,<br/>parallel subagents with exclusive file scopes"]
   G --> V["Phase 6: verify — tests, real hook triggers,<br/>CI run, benchmark re-run, adversarial review"]
@@ -109,15 +112,15 @@ Nothing gets proposed without a signal in your repo that justifies it.
 |---|---|
 | Root rules | plan before code and wait for "go" · Clarifications on questioned plans + decision log · evidence before architecture · feasibility spikes gated per spike id · plan folders for multi-PR work · use-case table by user state · docs first · package before custom engineering (reliability checklist) · exact pins at least 5 days old · full-circle verification · review lanes · compliance stop-check · trim with audit |
 | Agents | orchestrator / implementer / reviewer roles · per-domain implementers with **Build rules** and a **Handoff brief** · diff reviewer · plan reviewer · reference agents |
-| Skills | `plan-feature` (size → consumer sweep → docs first → evidence gate → registry → invariants; plan folders, diagram/method pickers) · `verify-integration` (per-service recipes, evidence-stamped final message) · `reflect` (corrections become rules) · `debugging` (hazard search, mitigation ≠ root cause) · `pr-review` (independent vs self-check + seal) · `pr-scope` (freeze scope, route findings to follow-ups) · `interview-me` |
-| Commands | `pr-triage` (each review comment: in scope or deferred) |
-| Hooks | outward-writes blocker (fail-closed) · protected-branch guard · dangerous-command gate with preview · feature-intent router · correction capture · session status · session hand off (save/load) · index reminder and refresh · lint if changed · env-docs parity · compliance tripwire · branch policy · PR preflight (+ independent-review seal notice) |
-| Architecture tests | directory ↔ registry parity · registry ↔ filesystem · content ↔ assets · unique codes · i18n parity |
-| Custom lint | layer boundaries · no cycles · SDK gateways · native deps confined to one runtime · required colocated tests · catch must report · house wrappers |
-| CI | AI-config sync check · lint/typecheck/tests · parity checks · PR preflight · branch-policy guard · migration contract gate · contract issue on merge · plan-folder gate and stale check · post-deploy smoke · review routing |
-| Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check · skill lint · skill-routing pack · dependency-family check |
+| Skills | `plan-feature` (size → consumer sweep → docs first → evidence gate → registry → invariants; plan folders, diagram/method pickers) · `verify-integration` (per-service recipes, evidence-stamped final message) · `reflect` (corrections become checks first, rules last; ratchet, expiring exceptions, prune mode) · `debugging` (hazard search, mitigation ≠ root cause) · `pr-review` (independent vs self-check + seal) · `pr-scope` (freeze scope, route findings to follow-ups) · `interview-me` |
+| Commands | `pr-triage` (each review comment: in scope or deferred) · `pr-make` (commit, push, open the PR in one request) · `sync-dev` (merge the integration branch, keep local work) · `git-clean` (delete unprotected branches and worktrees after one go) |
+| Hooks | outward-writes blocker (fail-closed) · protected-branch guard · dangerous-command gate with preview · feature-intent router · correction capture · session status · session hand off (save/load) · index reminder and refresh · lint if changed · env-docs parity · compliance tripwire · branch policy · PR preflight (+ independent-review seal notice) · Unicode firewall (machine-wide) · OpenCode shims (ask-guards, hand off) |
+| Architecture tests | directory ↔ registry parity · registry ↔ filesystem · content ↔ assets · unique codes · i18n parity · UI surfaces inventory · job-leak guard · layout guard (overflow + width sweep) |
+| Custom lint | layer boundaries · no cycles · SDK gateways (+ a test that they still fire) · native deps confined to one runtime · required colocated tests · catch must report · house wrappers |
+| CI | AI-config sync check · lint/typecheck/tests · real deploy artifact · parity checks · PR preflight · branch-policy guard · migration contract gate · contract issue on merge · contract ready after the prod migration · plan-folder gate and stale check · post-deploy smoke · review routing · stale-branch prune |
+| Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check · skill lint · skill-routing pack · dependency-family check · Renovate + release-age gate (pnpm `minimumReleaseAge`) |
 | Permissions | deny → ask → allow layers for shell, secrets and outward actions |
-| Registries | side-effect registry · blueprint (inventory) · environment variables · use-case matrix |
+| Registries | side-effect registry · blueprint (inventory) · environment variables · use-case matrix · UI surfaces |
 | MCP servers | official servers for the services you use, with prod/sandbox split. Proposed only, never installed without your OK |
 
 The full catalog, with the failure behind each item, is in
@@ -142,12 +145,16 @@ check that verifies it, canonical source, variants per stack) are indexed in
 ```
 skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
-  references/              loaded on demand: options menu, discovery lenses, code style,
-                           benchmark, decision matrix, guardrail catalog, concept catalog
-                           (+ concepts/), MCP discovery, rulesync
-  templates/               rules, agents, skills, commands, registries, hooks (+ tests),
-                           arch tests, lint, CI, automations
+  THIRD_PARTY.md           sources and licenses of adapted templates (travels with the skill)
+  references/              loaded on demand: options menu, discovery lenses, system design,
+                           code style, benchmark, decision matrix, guardrail catalog,
+                           concept catalog (+ concepts/), MCP discovery, rulesync,
+                           recommended tools
+  templates/               system design + ADR, rules, agents, skills, commands, registries,
+                           hooks (+ tests), arch tests, test guards, lint, CI, automations
 ```
+
+Third-party material and its licenses: [`THIRD_PARTY.md`](THIRD_PARTY.md).
 
 ## Developing
 
@@ -180,3 +187,12 @@ that handle money, auth or personal data.
 
 **Does it install MCP servers?** No. It proposes official servers with their install commands and
 waits for your OK on each one.
+
+## Contributing, security and license
+
+- How to propose changes, run the checks and credit third-party material:
+  [`CONTRIBUTING.md`](CONTRIBUTING.md). Participation follows the
+  [Code of Conduct](CODE_OF_CONDUCT.md).
+- Found a vulnerability? Report it privately as described in [`SECURITY.md`](SECURITY.md).
+- Released under the [MIT License](LICENSE). Third-party material keeps its own license:
+  [`THIRD_PARTY.md`](THIRD_PARTY.md).

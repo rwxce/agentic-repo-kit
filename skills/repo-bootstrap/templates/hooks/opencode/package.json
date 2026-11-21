@@ -1,0 +1,4 @@
+{
+  "//": "Lets node --test load the .js plugins as ES modules in this kit. Not part of the template: do not copy it.",
+  "type": "module"
+}
