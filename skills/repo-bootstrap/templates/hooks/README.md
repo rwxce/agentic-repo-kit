@@ -38,6 +38,16 @@ text and always exit 0 (except `pr-preflight --strict`).
 | `pr-precheck-seal.mjs` | `node scripts/pr-precheck-seal.mjs check [base]` (exit 0 fresh, 1 stale/missing, 2 error) · `write [base]` | Re-running the pr-scope precheck on an unchanged diff, or skipping it after the diff changed. Fingerprint = working tree vs merge-base with `origin/<base>` (default `CONFIG.defaultBase`), so staging/committing the same change keeps it fresh |
 | `review-seal.mjs` | `node scripts/review-seal.mjs check [base]` · `fingerprint [base]` (saves the exact diff to review) · `write [base] --expect <fp>` (refuses if the diff moved during the review; same exit codes; imports `pr-precheck-seal.mjs`) | Opening a flow-sensitive PR with no independent (fresh-context) review of this exact diff. The reviewer writes it; `pr-preflight` (advisory) and the PR-creation command check it |
 
+### Machine-wide hooks (installed outside the repo)
+
+| Script | Usage | What it prevents |
+|---|---|---|
+| `unicode-firewall.mjs` | UserPromptSubmit + PostToolUse `*` + PostToolUseFailure `*`, registered in `<config>/settings.json` (`<config>` = `$CLAUDE_CONFIG_DIR` or `~/.claude`) by `install-unicode-firewall.mjs` (dry run by default, `--write` to apply; idempotent, keeps other hooks, backs up settings) | A prompt injection hidden from the human but read by the model: Unicode Tags, bidi controls and stray zero-width characters are stripped from tool output (`updatedToolOutput`) and decoded for the model as data; a pasted prompt carrying Tags or bidi is blocked; Latin words disguised with Cyrillic/Greek look-alikes only warn. A failed tool's output cannot be rewritten, so it is only flagged. Fails open on internal errors, withholds output it cannot inspect |
+
+Why machine-wide: the threat comes with what the agent reads (web, issues, MCP output, third-party
+skills), in any repo. Keep the repo copy as the source and its tests in CI; never put raw invisible
+characters in the hook sources (build them from code points).
+
 Skills referenced by name (`plan-feature`, `reflect`) are conventions: point `skill` at whatever
 your repo calls them, or drop the hook if you have none.
 

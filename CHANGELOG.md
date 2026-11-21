@@ -11,6 +11,9 @@ Templates brought up to date with the reference repo they were distilled from.
   block table, standards to load, severity, finding format, final output). SKILL.md points to it.
 - `skills/reflect/references/checks.md`: the check ladder, red first, shrink-only baselines,
   expiring exceptions and prune mode.
+- `hooks/unicode-firewall.mjs` + `install-unicode-firewall.mjs` (+ test): machine-wide Claude Code
+  hook that strips Unicode Tags, bidi controls and stray zero-width characters from tool output,
+  blocks pasted prompts carrying them and warns on look-alike Latin words.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
