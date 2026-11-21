@@ -1,0 +1,98 @@
+# WHAT: Weekly prune of remote branches nobody is working on. "Delete head branch on merge" (repo
+#   setting) misses two kinds: branches whose PR was closed without merging, and branches pushed
+#   without a PR that stopped moving. This deletes both, never a protected branch or one with an
+#   open PR, and writes a table of what it did (or would do) to the job summary. GitHub keeps every
+#   PR's commits under refs/pull/<n>/head, so a deleted branch with a PR can be restored from the PR
+#   page ("Restore branch"); a branch with no PR cannot, hence the age cutoff.
+# REPO SIGNAL: agents and parallel worktrees pushing many short-lived branches; a branch list nobody
+#   can read; `git fetch` pulling hundreds of dead refs into every worktree.
+# CONFIGURE: PROTECTED (regex of long-lived branches: integration, release, production),
+#   MAX_AGE_DAYS (branches without a PR), GRACE_DAYS (closed-PR branches that moved recently are
+#   kept: someone may be reviving them), the runner label and the cron. Turn on "Automatically
+#   delete head branches" in the repo settings first; this covers the rest.
+#   The schedule only runs from the default branch. A manual run lists by default; tick `apply`.
+name: Prune stale branches
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Delete the branches (unchecked = only list them)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # delete refs
+  pull-requests: read
+
+concurrency:
+  group: prune-stale-branches
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest # <or your runner label>
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      PROTECTED: '^(main|<integration-branch>|<release-branch>)$'
+      MAX_AGE_DAYS: 30
+      GRACE_DAYS: 2
+      # The schedule always applies; a manual run applies only when the box is ticked.
+      APPLY: ${{ github.event_name == 'schedule' || inputs.apply }}
+    steps:
+      - name: Delete stale branches
+        run: |
+          set -euo pipefail
+          cutoff=$(date -u -d "-${MAX_AGE_DAYS} days" +%s)
+          grace=$(date -u -d "-${GRACE_DAYS} days" +%s)
+          default_branch=$(gh api "repos/$REPO" --jq '.default_branch')
+
+          # Head branch -> PR states. Limit is generous; raise it on very old, busy repos.
+          prs=$(gh pr list --repo "$REPO" --state all --limit 2000 --json headRefName,state)
+
+          {
+            echo "## Prune stale branches (apply: $APPLY)"
+            echo
+            echo "| Branch | Reason | Result |"
+            echo "|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          deleted=0
+          while IFS=$'\t' read -r branch sha protected_flag; do
+            [[ "$branch" =~ $PROTECTED ]] && continue
+            [[ "$branch" == "$default_branch" ]] && continue
+            # Branch protection rules on GitHub are respected too, whatever PROTECTED says.
+            [[ "$protected_flag" == "true" ]] && continue
+
+            states=$(jq -r --arg b "$branch" '[.[] | select(.headRefName == $b) | .state] | unique | join(",")' <<<"$prs")
+            [[ ",$states," == *",OPEN,"* ]] && continue
+
+            committed=$(gh api "repos/$REPO/commits/$sha" --jq '.commit.committer.date')
+            committed_s=$(date -u -d "$committed" +%s)
+            if [[ -n "$states" ]]; then
+              # Closed or merged PR: restorable from the PR page, so only a short grace period.
+              (( committed_s < grace )) || continue
+              reason="PR ${states,,}, last commit $committed"
+            else
+              (( committed_s < cutoff )) || continue
+              reason="no PR, last commit $committed"
+            fi
+
+            result="would delete"
+            if [[ "$APPLY" == "true" ]]; then
+              if gh api -X DELETE "repos/$REPO/git/refs/heads/$branch" --silent; then
+                result="deleted ($sha)"
+                deleted=$((deleted + 1))
+              else
+                result="failed"
+              fi
+            fi
+            echo "| \`$branch\` | $reason | $result |" >> "$GITHUB_STEP_SUMMARY"
+          done < <(gh api --paginate "repos/$REPO/branches" --jq '.[] | [.name, .commit.sha, (.protected | tostring)] | @tsv')
+
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "Deleted: $deleted" >> "$GITHUB_STEP_SUMMARY"

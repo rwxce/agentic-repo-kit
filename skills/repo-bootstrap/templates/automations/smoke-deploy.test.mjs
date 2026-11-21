@@ -1,7 +1,7 @@
 // Zero-dependency tests. Run: node --test automations/
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { checkWithRetry, smoke } from './smoke-deploy.mjs'
+import { authHeadersFrom, checkWithRetry, smoke } from './smoke-deploy.mjs'
 
 const config = { checks: ['/a', '/b'], retryAttempts: 3, retryBackoffMs: 1, requestTimeoutMs: 1000 }
 const sleep = async () => {}
@@ -40,4 +40,20 @@ test('resolves paths against the base URL', async () => {
   const seen = []
   await smoke('http://x.test/base/', { config, sleep, fetchImpl: async (url) => (seen.push(url), { status: 200 }) })
   assert.deepEqual(seen, ['http://x.test/a', 'http://x.test/b'])
+})
+
+test('auth headers are all or nothing, and are sent on every request', async () => {
+  const map = { 'X-Id': 'SMOKE_ID', 'X-Secret': 'SMOKE_SECRET' }
+  assert.deepEqual(authHeadersFrom({ SMOKE_ID: 'i' }, map), {})
+  assert.deepEqual(authHeadersFrom({}, {}), {})
+  const headers = authHeadersFrom({ SMOKE_ID: 'i', SMOKE_SECRET: 's' }, map)
+  assert.deepEqual(headers, { 'X-Id': 'i', 'X-Secret': 's' })
+  const seen = []
+  await checkWithRetry('http://x.test', '/a', { config, sleep, headers, fetchImpl: async (_u, init) => (seen.push(init.headers), { status: 200 }) })
+  assert.deepEqual(seen, [headers])
+})
+
+test('a redirect to a proxy login is a failed check, not a pass', async () => {
+  const r = await checkWithRetry('http://x.test', '/a', { config, sleep, headers: {}, fetchImpl: async () => ({ status: 302 }) })
+  assert.equal(r.ok, false)
 })

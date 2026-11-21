@@ -22,6 +22,8 @@ Templates are in `templates/` (see `templates/README.md`).
 | Compliance tripwire | Stop | silent new tracking, cookies/storage, outbound calls, consent bypass | personal data / legal pages | A | `hooks/compliance-tripwire.mjs` |
 | Branch-policy tripwire | Stop | local commits on protected branches | protected branches | A | `hooks/branch-policy.mjs` |
 | PR preflight | Stop (A) / CI (B) | committed `.env*`, `.env` dropped from .gitignore, heavy binaries; (A only) a flow-sensitive diff with no fresh independent-review seal | always | A / **B** | `hooks/pr-preflight.mjs` |
+| Unicode firewall (machine-wide) | UserPromptSubmit + PostToolUse / PostToolUseFailure `*` | prompt injection hidden in invisible characters (Unicode Tags, bidi controls, zero-width) inside tool output or a pasted prompt; look-alike Latin words (warn) | agents read untrusted text: web, issues, MCP output, third-party skills | **B** on prompts with Tags/bidi; strips tool output; A otherwise; fails open | `hooks/unicode-firewall.mjs` + `hooks/install-unicode-firewall.mjs` |
+| OpenCode shims (plugins) | `tool.execute.before` / `session.idle` / compaction | on OpenCode, "ask" guards running unchallenged (a plugin cannot ask) and hand offs saved without the pending block or context warning | OpenCode among the agent tools | **B** (rejects) / A | `hooks/opencode/` |
 | Process cleanup | SessionEnd | orphan dev servers exhausting the machine | parallel worktrees / dev servers | — | inline command |
 | Precheck seal (CLI) | used by skills | the same scope precheck re-run on an unchanged diff, or skipped after the diff changed | pr-scope skill | — | `hooks/pr-precheck-seal.mjs` |
 | Independent-review seal (CLI) | used by skills | a flow-sensitive PR opened with only the author session's self-check, or reviewed on a diff that changed afterwards | review lanes with a fresh-context reviewer | — | `hooks/review-seal.mjs` |
@@ -39,7 +41,10 @@ Every hook ships with tests; hooks run in CI tests like any other code.
 | Registry ↔ filesystem | registered routes/paths pointing nowhere | central routes/paths file | `arch-tests/route-registry-exists.test.ts` |
 | Content ↔ assets | posts/demos referencing missing images, feeds missing entries | content collections | `arch-tests/content-assets-exist.test.ts` |
 | Unique codes | duplicate error/event codes across groups | error-code or event catalogs | `arch-tests/unique-codes.test.ts` |
+| UI surfaces inventory | a new page or overlay missing from the inventory (responsive reviews start incomplete), or rows citing deleted files | many pages and overlays; responsive bugs on unchecked sizes | `arch-tests/ui-surfaces-inventory.mjs` + `registries/ui-surfaces.md` |
 | i18n key parity | locales drifting from the source locale | >1 locale | `arch-tests/i18n-parity.mjs` |
+| Job-leak guard (test setup) | a test leaving scheduled jobs pending, hidden by global fake timers or surfacing later as a flake in an unrelated file | in-memory test backends with a scheduler or queue; flakes that move between files | `test-guards/job-leak-guard.mjs` |
+| Layout guard (Playwright: overflow at fixed widths + width sweep) | horizontal scroll, text off screen or clipped, colliding nav controls, items flickering while resizing; none visible to jsdom | responsive UI, translated strings, collapsing nav | `test-guards/layout/` |
 | Review-routing policy | sensitive paths reviewed in the light lane; unknown authors passing | review lanes | `ci/review-routing/` |
 
 ## 3. Custom lint
@@ -55,6 +60,7 @@ Every hook ships with tests; hooks run in CI tests like any other code.
 | `must-use-wrapper` | raw API calls bypassing the house wrapper | house wrapper exists | local rules |
 | `registry-path-exists` | registry entries pointing to missing files | registries in code | local rules |
 | No literal UI strings / no console | untranslated UI, logs bypassing the logger | i18n / logger modules | snippet |
+| Restrictions-still-fire test | a later flat-config block replacing a restriction list, an `ignores` glob or a renamed folder silently switching a gateway rule off while lint stays green | restriction rules acting as gateways, more than one config block per file | `lint/lint-restrictions.lint.test.mjs` |
 
 Roll out as `warn`, flip to `error` once clean.
 
@@ -64,13 +70,17 @@ Roll out as `warn`, flip to `error` once clean.
 |---|---|---|---|
 | AI-config sync (`rulesync:check`) | hand-edited generated agent files drifting from source | rulesync | `ci/ci.yml` |
 | Lint + typecheck + tests (changed on PR, full on push) | regressions | always | `ci/ci.yml` |
+| Guard tests on every PR (`list-guard-tests`) | a guard test that reads files from disk never selected by changed-only runs, so the PR it should fail goes green | changed-only tests on PRs | `ci/ci.yml`, `ci/list-guard-tests.mjs` |
+| Real deploy artifact (`check-deploy-artifact`) | a deploy that builds green and crashes on its first run: imports that only resolve after codegen, packages that read files next to their JS and break once bundled | a deploy that bundles code itself with no CI-usable dry run; native or file-reading packages | `ci/check-deploy-artifact.mjs`, `ci/ci.yml` |
 | Parity checks (i18n, env docs) | registry drift | the registries exist | `ci/ci.yml` |
 | PR preflight strict | secrets and heavy binaries merged | always | `ci/ci.yml` |
 | Branch-policy guard (`pull_request_target`) | PRs into release branches from the wrong source | release branches | `ci/branch-policy-guard.yml` |
 | Migration contract gate | schema removals without a tracked contract step | schema migrations | `ci/migration-contract-gate.yml` |
 | Contract issue on merge | a merged expand/migrate step whose contract (drop the old field) is never scheduled, so dead schema lives forever | schema migrations | `ci/contract-issue.yml` |
+| Contract ready after the prod migration | a contract issue left open long after its migration finished, or a destructive contract PR opened before the migration succeeded | schema migrations run by the production deploy | `ci/mark-ready-contracts.mjs` |
 | Plan-folder gate + stale check | multi-PR plan folders left behind after the initiative ships, or closed without promoting what must outlive them | `docs/plans/` initiatives | `ci/plan-folder/` |
 | Post-deploy smoke | a deploy that builds green but fails at runtime, shipped without anyone hitting it | deployed environments | `ci/smoke-deploy.yml` + `automations/smoke-deploy.mjs` |
+| Prune stale branches (weekly) | dead remote branches piling up (closed-PR heads, PR-less pushes) so nobody can tell what is live | many short-lived agent branches | `ci/prune-stale-branches.yml` |
 | Skill lint | skills with no description (never routed to) or oversized ones that cost context every session | own skills | `automations/check-skills.mjs` |
 | Skill-routing pack | a prompt-router regex or a skill description edit silently breaking which skill a request reaches | routing hooks + own skills | `automations/skill-routing.*` |
 | Dependency families | packages of one family drifting to mismatched versions that break at runtime | multi-package SDKs | `automations/check-dependency-families.mjs` |
@@ -83,6 +93,7 @@ Roll out as `warn`, flip to `error` once clean.
 | Workspace setup script (deps, codegen, index in background, copy index from main checkout) | agents working without the index or generated code | worktree-based workflow | `automations/workspace-setup.sh` |
 | Release promotion (dev → stage → main, fast-forward, smoke test, deployed-commit check) | hotfixes lost, wrong commit deployed | multi-environment deploys | `automations/release-flow.md` |
 | Contract issue on migration merge | expand/migrate/contract never contracted | schema migrations | `ci/contract-issue.yml` + `automations/release-flow.md` |
+| Update bot with a release-age gate (Renovate + pnpm `minimumReleaseAge`, kept equal by `check-release-age`) | a compromised release reaching node_modules through a bot PR or an agent install before it is pulled; ranges moving the lockfile without review; bot PRs red because the install refuses their version | lockfile + agents running installs | `automations/renovate.json5`, `automations/pnpm-workspace.snippet.yaml`, `automations/check-release-age.mjs` |
 | Vendored-skill version check | stale or unpinned vendored skills | vendored skills | `automations/check-vendored.mjs` |
 | Code-index refresh on stop | stale index | code index | `hooks/index-refresh.mjs` |
 
@@ -91,7 +102,7 @@ Roll out as `warn`, flip to `error` once clean.
 | Layer | Contents |
 |---|---|
 | deny | approving PRs; mutating `gh api` flags (`-f/-F/--field/--input/-X POST…`); reading `.env*`, keys, certificates; build/vendor dirs |
-| ask | destructive git, recursive delete, deploys, secrets CLIs, publishing, merging, force-kill, sudo, comments/reviews |
+| ask | destructive git, recursive delete, deploys, secrets CLIs, publishing, merging, force-kill, sudo, comments/reviews, third-party installs (`git clone`, MCP/plugin/skill adds, `pip`/`uv tool install`) so they go through quarantine first |
 | allow | read-only `gh`, tests, lint, typecheck, formatter check |
 
 Permissions are the first layer; the hooks are the second (they catch shapes globs miss).
@@ -105,6 +116,7 @@ Template: `rulesync/permissions.jsonc`.
 | `blueprint.md` (inventory of agents, skills, hooks, lint, CI, test kinds; updated in the same PR) | everyone | `registries/blueprint.md` |
 | `environment-variables.md` (every var, where consumed, per environment) | env-docs hook | `registries/environment-variables.md` |
 | `use-case-matrix.md` (state axes, transitions, named product rules; review findings are checked against the rules) | plan-feature, pr-triage, reviewers | `registries/use-case-matrix.md` |
+| `ui-surfaces.md` (every page and overlay, behaviour per breakpoint, last verified; guarded by `arch-tests/ui-surfaces-inventory.mjs`) | UI implementer, reviewers, width sweeps | `registries/ui-surfaces.md` |
 | Compliance inventory (data, vendors, retention vs published legal texts) | compliance check | write per project |
 
 ## 8. Planning and review protocol
@@ -118,7 +130,14 @@ Template: `rulesync/permissions.jsonc`.
 | Diagram / method / readability pickers | walls of text nobody reviews; the wrong analysis method for the question | big plans | `skills/plan-feature/references/` |
 | Use-case table per plan | behaviour that depends on user state changed for one state and broken for another, or across a transition | state-dependent features | `registries/use-case-matrix.md` |
 | Scope freeze + follow-up routing | a PR growing to absorb every review finding until it is unreviewable | review-heavy PR flow | `skills/pr-scope/`, `commands/pr-triage.md` |
+| PR creation command (`/pr-make`) | PRs opened against the wrong base, without the precheck, with unrelated commits, an empty diagram or invented evidence | agents open PRs | `commands/pr-make.md` |
+| Sync command (`/sync-dev`) | local work lost by a bare stash/pop shared across worktrees, upstream behaviour dropped to clear a conflict, a rebase of a pushed branch | long-lived branches, parallel worktrees | `commands/sync-dev.md` |
+| Cleanup command (`/git-clean`) | branch and worktree sprawl cleaned by hand, deleting someone's active branch | many agent branches and worktrees | `commands/git-clean.md` + `hooks/protect-branches.mjs` |
 | Requirements interview | a plan built on silently invented requirements | underspecified asks | `skills/interview-me/` |
 | Review type `independent \| self-check` + seal | the author session's own review passed off as the independent look | flow-sensitive lane | `skills/pr-review/`, `hooks/review-seal.mjs` |
 | Evidence-stamped final message (sha, clean/dirty, passed/failed/blocked/not run) | "verified" claims about a different commit, or evidence reused after the code changed | verify-integration in use | `skills/verify-integration/` |
 | Hazard search + "mitigation is not root cause" | a symptom patched while the same hazard stays live elsewhere | debugging skill in use | `skills/debugging/` |
+| Per-step validation by use case (happy, failure, legacy data) | a step built on an earlier one that was never checked; everything found broken at the end | any implementation | `rules/root.md` |
+| Findings recap at the end of every progress message | findings and pending decisions buried in earlier messages of a long run | loops, multi-step runs | `rules/root.md` |
+| Third-party quarantine (read in `.context/quarantine/`, install is an `ask`) | a skill, MCP or repo installed with hooks or scripts nobody read | any third-party install | `rules/root.md`, `rulesync/permissions.jsonc` |
+| Reflect escalates to a check (ladder, class-level on the second repeat, red first, shrink-only baseline, expiring exceptions, prune mode) | a correction written as prose that the next session ignores again | any repo with custom checks | `skills/reflect/`, `skills/reflect/references/checks.md` |
