@@ -20,6 +20,7 @@
 ### Changed
 - Flow: understand → design → propose → generate → verify → learn. `SKILL.md`, the README
   diagram and the templates index include the new phase.
+- CI workflow (`ci.yml`): template tests, the kit's guard tests and the skill lint on every pull request and push to `dev`.
 
 ## 0.5.0 — 2026-11-21
 
