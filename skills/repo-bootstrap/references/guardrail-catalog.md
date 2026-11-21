@@ -64,6 +64,7 @@ Roll out as `warn`, flip to `error` once clean.
 |---|---|---|---|
 | AI-config sync (`rulesync:check`) | hand-edited generated agent files drifting from source | rulesync | `ci/ci.yml` |
 | Lint + typecheck + tests (changed on PR, full on push) | regressions | always | `ci/ci.yml` |
+| Guard tests on every PR (`list-guard-tests`) | a guard test that reads files from disk never selected by changed-only runs, so the PR it should fail goes green | changed-only tests on PRs | `ci/ci.yml`, `ci/list-guard-tests.mjs` |
 | Parity checks (i18n, env docs) | registry drift | the registries exist | `ci/ci.yml` |
 | PR preflight strict | secrets and heavy binaries merged | always | `ci/ci.yml` |
 | Branch-policy guard (`pull_request_target`) | PRs into release branches from the wrong source | release branches | `ci/branch-policy-guard.yml` |

@@ -6,6 +6,7 @@ with WHAT / REPO SIGNAL / CONFIGURE. Copy only what the repo's signals justify.
 | File | Destination | Prevents | Repo signal |
 |---|---|---|---|
 | `ci.yml` | `.github/workflows/ci.yml` | Merging code that fails lint/types/tests, or drifted generated AI config. | Always. `run --if-present` makes missing scripts a no-op. |
+| `list-guard-tests.mjs` (+ test) | `scripts/` | A PR that breaks a guard test (one that reads files from disk, e.g. "every page is registered") going green because changed-only test runs follow imports and never select it. `ci.yml` runs the list on every PR. | Changed-only tests on PRs and at least one test that reads the repo from disk. |
 | `branch-policy-guard.yml` | `.github/workflows/` | PRs into the wrong protected branch. | A dev -> stage -> prod flow. |
 | `migration-contract-gate.yml` | `.github/workflows/` | Expand/migrate/contract with a forgotten "contract" step. | Migration registry file + a deprecation process. |
 | `contract-issue.yml` | `.github/workflows/` | After merge, a migration whose destructive "contract" step nobody tracks (the safety net when the pre-merge gate was bypassed). | Same as above; pair the two. |
@@ -25,7 +26,8 @@ with WHAT / REPO SIGNAL / CONFIGURE. Copy only what the repo's signals justify.
   destination ref** (`git fetch origin b:refs/remotes/origin/b`), because a bare fetch only fills
   FETCH_HEAD. If that fetch fails, fall back to the full suite loudly, never silently.
 - **`--changed` on PRs, full suite on push** to the integration branch: changed-only misses tests
-  broken indirectly via mocks or untraced dependencies; the push run is the safety net.
+  broken indirectly via mocks or untraced dependencies; the push run is the safety net. Guard tests
+  (they read files instead of importing them) run on every PR on top of the changed set.
 - **Fail closed**: unknown author, ambiguous lane, API response without a `patch` (huge diff) all
   mean "needs a human", never "skip".
 - **Generated config check** (`rulesync:check` or equivalent) in CI turns "never hand-edit generated
