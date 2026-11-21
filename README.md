@@ -122,6 +122,9 @@ Nothing gets proposed without a signal in your repo that justifies it.
 
 The full catalog, with the failure behind each item, is in
 [`skills/repo-bootstrap/references/guardrail-catalog.md`](skills/repo-bootstrap/references/guardrail-catalog.md).
+The engineering concepts behind them (51 cards: problem, principle, when not, typical mistakes, the
+check that verifies it, canonical source, variants per stack) are indexed in
+[`skills/repo-bootstrap/references/concept-catalog.md`](skills/repo-bootstrap/references/concept-catalog.md).
 
 ## Principles
 
@@ -140,7 +143,8 @@ The full catalog, with the failure behind each item, is in
 skills/repo-bootstrap/
   SKILL.md                 the orchestrator (phases, gates, proposal format)
   references/              loaded on demand: options menu, discovery lenses, code style,
-                           benchmark, decision matrix, guardrail catalog, MCP discovery, rulesync
+                           benchmark, decision matrix, guardrail catalog, concept catalog
+                           (+ concepts/), MCP discovery, rulesync
   templates/               rules, agents, skills, commands, registries, hooks (+ tests),
                            arch tests, lint, CI, automations
 ```

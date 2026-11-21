@@ -108,6 +108,10 @@ plausibly need (touches data + auth + money/external service + UI + copy/legal).
 
 Map signals to artifacts with `references/decision-matrix.md` and pick concrete pieces from
 `references/guardrail-catalog.md`, `references/mcp-discovery.md` and `references/rulesync.md`.
+For engineering concepts (auth boundary, webhooks, jobs, migrations, pooling, backups, SLOs…),
+use the matrix's "Project signal → concepts" table and open only the matching cards from
+`references/concept-catalog.md`; each card names the check that verifies it and when it does not
+apply. External cards are proposals to validate, not proven practice.
 Write the proposal to `.context/repo-bootstrap/proposal.md` and summarize it in chat.
 
 Format — one table per chosen family, one row per artifact:
@@ -181,6 +185,7 @@ Migrating loose config into rulesync is an import with an audit table — nothin
 | `references/benchmark.md` | Phase 3 |
 | `references/decision-matrix.md` | Phase 4, mapping signals to artifacts |
 | `references/guardrail-catalog.md` | Phase 4, choosing concrete guardrails |
+| `references/concept-catalog.md` | Phase 4, only the concept cards a repo signal points to (`references/concepts/<slug>.md`) |
 | `references/mcp-discovery.md` | Phase 4, MCP family |
 | `references/rulesync.md` | Phase 4/5, when rulesync is chosen |
 | `templates/README.md` | Phase 5, index of every template |

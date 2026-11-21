@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Concept catalog: `references/concept-catalog.md` indexes 51 concept cards under
+  `references/concepts/`, loaded on demand. Each card has problem, principle, when it applies,
+  when it doesn't, typical mistakes, the check that verifies it, canonical source and variants per
+  stack. 33 are generalized from the production project the kit came from; 18 are external
+  practice marked as not yet proven there (connection pooling, isolation levels, optimistic
+  concurrency, outbox, sagas, circuit breaker, dead-letter queues, timeouts and retries,
+  idempotent APIs, backups with a tested restore, SLOs and error budgets, SBOM and provenance,
+  secrets management, input validation, security headers, feature flags, observability, health
+  checks). Every source URL was checked; cards with no primary source say "None found".
+- `decision-matrix.md`: a "Project signal → concepts" table.
+- `guardrail-catalog.md`: "When not" and "Origin" columns on every table.
+
 ## 0.5.0 — 2026-11-21
 
 First release on the new branch model: `dev` holds every commit, `main` one commit per release.
