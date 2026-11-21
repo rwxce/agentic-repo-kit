@@ -4,8 +4,10 @@ Each template starts with a header comment: what it is, the repo signal that jus
 to fill. Strip that header when writing the real file (frontmatter must be the first thing in agent
 and skill files). Fill every `<placeholder>`; delete optional sections whose signal is absent.
 
-| Dir | Contents | Lands in the target repo as |
+| Dir or file | Contents | Lands in the target repo as |
 |---|---|---|
+| `system-design.md` | one-page system design: brief, observable requirements, trust boundaries, risks, decisions each linked to its check | `docs/architecture/system-design.md` (standard or deep depth only) |
+| `adr.md` | one decision: alternatives on checkable criteria, the decision, **Enforced by** | `docs/adr/NNNN-<slug>.md` |
 | `rules/` | `root.md` — root rules (plan + go, Clarifications + decision log, evidence before architecture, spikes, plan folders, use-case table, docs first, verification, git/review policy, agents roles, trim with audit…) | `.rulesync/rules/` or `CLAUDE.md`/`AGENTS.md` |
 | `agents/` | `implementer.md`, `diff-reviewer.md`, `plan-reviewer.md`, `api-reference.md` | `.rulesync/subagents/` or `.claude/agents/` |
 | `skills/` | `plan-feature/` (+ sweep and handoff briefs, loop roadmap, plan folder, evidence and spikes, diagram/method pickers, plan readability), `verify-integration/`, `reflect/`, `debugging/`, `pr-review/`, `pr-scope/` (+ scope and adversarial-review references), `interview-me/` | `.rulesync/skills/` or `.claude/skills/` |
