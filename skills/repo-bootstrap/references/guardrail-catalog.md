@@ -128,6 +128,9 @@ Template: `rulesync/permissions.jsonc`.
 | Diagram / method / readability pickers | walls of text nobody reviews; the wrong analysis method for the question | big plans | `skills/plan-feature/references/` |
 | Use-case table per plan | behaviour that depends on user state changed for one state and broken for another, or across a transition | state-dependent features | `registries/use-case-matrix.md` |
 | Scope freeze + follow-up routing | a PR growing to absorb every review finding until it is unreviewable | review-heavy PR flow | `skills/pr-scope/`, `commands/pr-triage.md` |
+| PR creation command (`/pr-make`) | PRs opened against the wrong base, without the precheck, with unrelated commits, an empty diagram or invented evidence | agents open PRs | `commands/pr-make.md` |
+| Sync command (`/sync-dev`) | local work lost by a bare stash/pop shared across worktrees, upstream behaviour dropped to clear a conflict, a rebase of a pushed branch | long-lived branches, parallel worktrees | `commands/sync-dev.md` |
+| Cleanup command (`/git-clean`) | branch and worktree sprawl cleaned by hand, deleting someone's active branch | many agent branches and worktrees | `commands/git-clean.md` + `hooks/protect-branches.mjs` |
 | Requirements interview | a plan built on silently invented requirements | underspecified asks | `skills/interview-me/` |
 | Review type `independent \| self-check` + seal | the author session's own review passed off as the independent look | flow-sensitive lane | `skills/pr-review/`, `hooks/review-seal.mjs` |
 | Evidence-stamped final message (sha, clean/dirty, passed/failed/blocked/not run) | "verified" claims about a different commit, or evidence reused after the code changed | verify-integration in use | `skills/verify-integration/` |

@@ -34,6 +34,10 @@ Templates brought up to date with the reference repo they were distilled from.
   horizontal scroll, off-screen or clipped text and colliding controls; `layout-overflow.spec.ts`
   checks fixed widths x pages x locales, `layout-sweep.spec.ts` resizes 320 -> 1440 -> 320 in 20px
   steps with a monotonic check for collapsible items.
+- `commands/pr-make.md`, `sync-dev.md`, `git-clean.md`: open a PR end to end (base guards,
+  precheck gate, review-seal warning, lane, mandatory diagram); merge the integration branch in
+  with a tagged stash and per-file conflict rules; delete unprotected branches and worktrees after
+  one go on an inventory table, with a SHA backup.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
