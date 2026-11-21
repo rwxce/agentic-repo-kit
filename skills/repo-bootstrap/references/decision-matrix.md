@@ -69,5 +69,58 @@ strongest for diffs. Allow a one-call upgrade of an implementer for big creative
 ## Hooks, tests, lint, CI, automations, permissions, registries
 Pick from `guardrail-catalog.md`; each catalog row lists its signal.
 
+## Project signal → concepts
+
+Open only the cards a signal points to (`concept-catalog.md`, cards in `concepts/`). A concept
+enters the proposal with the signal (`file:line`), the card and the check it adds; if the card's
+"when it doesn't" matches the repo, leave it out and say why. External cards are proposals to
+validate, not proven practice.
+
+| Signal found in discovery | Concepts to read |
+|---|---|
+| Authenticated pages and public pages under one router | `default-deny-routes`, `route-registry`, `guard-tests` |
+| Multi-tenant data (workspace, team, org ids in the schema) | `authorization-at-the-data-boundary`, `input-validation-at-the-boundary` |
+| Route handlers or workers calling the data API without a user session | `shared-secret-bridges`, `secrets-management` |
+| Public entry points (API routes, server actions, functions, forms) | `input-validation-at-the-boundary`, `typed-errors`, `rate-limit-by-cost` |
+| Paid work behind an entry point (LLM, email, SMS, renders) | `rate-limit-by-cost`, `durable-jobs`, `circuit-breaker` |
+| Server fetches a user-supplied URL | `outbound-fetch-ssrf-guard` |
+| "Connect your account" OAuth flows | `signed-oauth-state` |
+| Incoming webhooks | `webhook-verify-dedupe-reread`, `reconciliation-and-retention-crons`, `transactional-outbox` |
+| Web app serving HTML with third-party scripts or user content | `security-headers-and-csp` |
+| `.env*` files, secrets in CI variables, several deploy targets | `secrets-management`, `change-completeness-preflight` |
+| Relational database reached from serverless or autoscaled code | `connection-pooling`, `transaction-isolation-levels` |
+| Money, quotas, inventory or seats (read-decide-write) | `transaction-isolation-levels`, `optimistic-concurrency-control`, `idempotent-api-requests` |
+| Records edited by several users or clients | `optimistic-concurrency-control` |
+| Schema migrations, mobile clients on older versions | `expand-migrate-contract`, `backup-and-tested-restore` |
+| Production data that cannot be regenerated | `backup-and-tested-restore` |
+| A state change followed by an event, email or call elsewhere | `transactional-outbox`, `durable-jobs` |
+| Multi-step flows across providers (charge → reserve → publish) | `saga-compensation`, `durable-jobs`, `dead-letter-queue` |
+| Billing provider, plans, quotas | `billing-mirror-and-server-side-entitlements`, `reconciliation-and-retention-crons` |
+| Published retention periods or privacy terms | `reconciliation-and-retention-crons`, `compliance-by-evidence` |
+| Background jobs or queues with retries | `durable-jobs`, `dead-letter-queue`, `timeouts-retries-backoff` |
+| Public API that creates resources; mobile clients on flaky networks | `idempotent-api-requests`, `timeouts-retries-backoff` |
+| Synchronous calls to a provider whose outage would exhaust capacity | `circuit-breaker`, `timeouts-retries-backoff` |
+| Several classes of background work, at least one with a deadline | `separate-work-queues` |
+| User uploads of images, video or documents | `presigned-upload-to-worker`, `native-binaries-in-workers` |
+| Native-binary packages plus serverless or edge deploys | `native-binaries-in-workers`, `layer-boundaries-as-lint` |
+| Client-rendered app with authenticated reactive data | `single-client-read-gateway` |
+| LLM calls in product features | `llm-boundary`, `rate-limit-by-cost`, `compliance-by-evidence` |
+| Error monitoring SDK configured | `every-catch-reports`, `typed-errors` |
+| Identifiable layers or modules, several contributors | `layer-boundaries-as-lint`, `guard-tests` |
+| Responsive UI, several locales, many dialogs | `layout-guard-and-ui-inventory`, `route-registry` |
+| Risky user-visible changes on real traffic; trunk-based work | `feature-flags` |
+| Production services with more than one component | `observability-logs-metrics-traces`, `health-checks` |
+| Long-running services behind a load balancer or orchestrator | `health-checks` |
+| Paying users or contractual uptime | `slos-and-error-budgets`, `backup-and-tested-restore` |
+| More than one deployed environment | `gated-release-pipeline`, `health-checks` |
+| Third-party dependencies (always) | `supply-chain-hygiene` |
+| Published packages, images or mobile binaries; customers asking for an SBOM | `sbom-and-provenance` |
+| PR workflow, solo maintainer or agents reviewing | `review-lanes`, `change-completeness-preflight` |
+| Personal data, analytics, cookies, legal pages | `compliance-by-evidence`, `every-catch-reports` |
+| Agents run shell commands in the repo | `agent-guardrail-hooks`, `planning-gate` |
+| More than one agent tool in use | `generated-agent-config` |
+| Daily agent use; long sessions resumed across chats | `corrections-become-rules`, `session-handoff` |
+| Medium or large codebase explored by agents | `code-graph-navigation` |
+
 ## MCP servers
 From Lens 4: one row per external service with an **official** MCP. See `mcp-discovery.md`.
