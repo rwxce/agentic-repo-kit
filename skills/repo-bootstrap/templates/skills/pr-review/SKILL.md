@@ -1,7 +1,9 @@
 <!--
 TEMPLATE: pr-review skill (lean, diff-based). Generate when the repo uses pull requests on a code
-host with a CLI (`gh`/`glab`). Fill: host CLI commands, base branch, the repo's sensitive paths and
-standards file. Strip this comment when writing the file.
+host with a CLI (`gh`/`glab`). The hard rules and the procedure live once in
+`references/pr-review.md`; this file only points there. Fill the `<…>` placeholders in both
+files: host CLI commands, base branch, the repo's review checklist, sensitive paths and standards
+files. Strip this comment when writing the file.
 -->
 ---
 name: pr-review
@@ -16,51 +18,32 @@ targets: ["*"]
 
 Reply in the user's language. Be direct; if something is serious, say so plainly.
 
-## Hard rules
+The hard rules (no code changes, remote refs only, private by default, no nits, lane detection,
+never approve) and the full procedure live in one place: **read and follow
+`references/pr-review.md`**. Always load `<review checklist path>` as part of the review (§6 of
+the reference) — some tools do not load it automatically.
 
-- Do not modify code or files. No `git pull`/`merge`/`rebase`; no destructive checkout. If there
-  are pending local changes, warn before touching anything.
-- Work against remote refs (`origin/<base>`, `origin/<head>`) and the real diff only. Do not
-  comment on unchanged lines or files outside the PR.
-- **Private by default.** The review ends in the conversation. Publish comments or reviews to the
-  host only if the user explicitly authorizes that publication. **Never approve a PR.** Never use
-  mutating API calls.
-- **No nits.** No style, naming, adjacent refactors, speculative cleanup, generic "add tests". If it
-  does not change the merge decision, it is noise.
-- Separate **facts**, **risks**, **hypotheses** and **opinions**; do not invent problems. Block on
-  real risk, never on taste.
-- If critical information is missing, stop and ask.
+## Minimum input
 
-## Input
+- PR URL (or the PR associated with the current branch, `<host CLI> pr view --json number,url`,
+  read-only)
 
-The PR URL, or the PR of the current branch (`<host CLI> pr view --json number,url`, read-only).
+## Flow (high level)
 
-## Flow
+1) Repo preflight + `git status --short`
+2) PR metadata with `<host CLI> pr view … --json …`, get the head SHA and detect the lane
+3) `git fetch origin <base> <head>`
+4) Commits + changed files + stats (`git log`, `git diff --name-status`, `git diff --stat`).
+   A review that will write the seal reads the snapshot diff from `review-seal.mjs fingerprint`
+   instead of the remote refs, in this step and in the block review (see the end of this file)
+5) Load the repo standards, then review by block — depth according to the lane. For
+   flow-sensitive PRs prefer the `<diff-reviewer>` agent (fresh context, strongest model), then
+   verify its findings yourself
+6) Executive summary + findings by severity + final recommendation
 
-1. Preflight: right repo, `git status --short`.
-2. PR metadata (`<host CLI> pr view … --json …`): base/head refs, head SHA, changed files.
-   **Detect the lane** from the root rule's review policy: *demonstrable* (check the evidence and
-   CI, do not review the implementation) or *flow-sensitive* (full review). A missing or ambiguous
-   lane, or any sensitive path (<globs>), is flow-sensitive.
-3. `git fetch origin <base> <head>`; list commits, changed files and stats.
-4. Load the repo's standards (root rule, `<sensitive-areas checklist or diff-reviewer agent>`) and
-   review block by block. Priorities, in order: **security** (authn/authz, injection, secrets,
-   privacy) → **regressions** (changed contracts, callers, migrations, idempotency) → data
-   integrity and cost → consequential UX.
-5. For flow-sensitive PRs prefer running the `<diff-reviewer>` agent (fresh context, strongest
-   model) over reviewing inline, then verify its findings yourself.
+## Output format
 
-## Output
-
-- **Summary:** what the PR does and the lane, 2-3 lines.
-- **Findings** by severity (Critical / Important), each with `file:line`, why it matters, and a
-  one-line suggested fix.
-- **Unverified** items, if any, and what evidence would settle them.
-- **Recommendation:** merge / merge after fixes / do not merge, with the one deciding reason.
-
-If the PR holds up, say so in one line. Do not pad the list.
-
-## Reviewer type and seal
+Use the private final format defined in `references/pr-review.md` (§11).
 
 The review's first line states who reviewed:
 - `Type: independent (fresh context, diff <seal hash>)` — a context that did not write the code: a
@@ -69,6 +52,13 @@ The review's first line states who reviewed:
 - `Type: self-check` — the session that wrote the code. A second pass by the same agent is still a
   self-check.
 
-An independent reviewer ends by running `node scripts/review-seal.mjs write <base>`; the seal goes
-stale as soon as the diff changes, and the PR-creation command and the PR preflight warn on a
-flow-sensitive diff without a fresh seal. A self-check never writes it.
+An independent reviewer that will write the seal starts with
+`node scripts/review-seal.mjs fingerprint <base>`, which saves the exact diff it fingerprints
+(merge-base → the author's working tree, unpushed and uncommitted work included) to
+`.context/pr-review/<branch>.diff`. **That file is the diff to review** — not
+`origin/<base>..origin/<head>` (`references/pr-review.md` §3) — so the reviewed code is the sealed
+code. It ends with `node scripts/review-seal.mjs write <base> --expect <that fingerprint>`. Both
+run from the author's worktree (a reviewer in another checkout `cd`s there first). The write
+refuses if the diff changed during the review, the seal goes stale as soon as the diff changes
+later, and the PR-creation command and the PR preflight warn on a flow-sensitive diff without a
+fresh seal. A self-check never writes it.

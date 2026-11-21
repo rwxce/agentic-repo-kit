@@ -28,7 +28,7 @@ text and always exit 0 (except `pr-preflight --strict`).
 | `session-start-status.mjs` | SessionStart | advisory | Starting to code on a fresh branch before planning; not knowing the code index state | A code index (graph, ctags, SCIP) and a plan-first convention | `INDEX_PATH`, `INDEX_BUILD_LOG`, `INDEX_CLI`, `INDEX_INSTALL_HINT`, `baseRefs`, `longLivedBranch`, `planNudge`, `index` (or `null`) |
 | `index-reminder.mjs` | PreToolUse `Grep\|Glob` | advisory, once per session | Blind grepping when a code index exists | Same index as above | `INDEX_PATH`, `INDEX_QUERY_HINT`, `markerPrefix` |
 | `index-refresh.mjs` | Stop | advisory | A code index going stale after edits, without paying its update cost on every turn | Same index as above | `indexDir`, `indexFile`, `updateCommand`, `sourceExt`, `timeoutMs` |
-| `save-handoff.mjs` | Stop + PreCompact | advisory | A new chat or a compacted session losing the branch state, the active plan and what was left pending | Long sessions; work picked up across chats or worktrees | `planDirs`, `pendingHeading`; env `HANDOFF_CONTEXT_TOKENS`, optional `HANDOFF_STATUS_CMD` |
+| `save-handoff.mjs` | Stop + PreCompact | advisory | A new chat or a compacted session losing the branch state, the active plan and what was left pending | Long sessions; work picked up across chats or worktrees | `planDir` (repo plans only; `plan.md` of the newest initiative wins), `pendingWords` (heading-shaped lines, last one wins); env `HANDOFF_CONTEXT_TOKENS`, optional `HANDOFF_STATUS_CMD`; reads `last_assistant_text` / `context_tokens` from stdin on hosts without a transcript |
 | `load-handoff.mjs` | SessionStart | advisory | Starting a session without reading the previous one's hand off | Same as above | `MAX_AGE_MS` |
 
 ### CLIs used by skills (not wired as hooks)
@@ -36,7 +36,7 @@ text and always exit 0 (except `pr-preflight --strict`).
 | Script | Usage | What it prevents |
 |---|---|---|
 | `pr-precheck-seal.mjs` | `node scripts/pr-precheck-seal.mjs check [base]` (exit 0 fresh, 1 stale/missing, 2 error) · `write [base]` | Re-running the pr-scope precheck on an unchanged diff, or skipping it after the diff changed. Fingerprint = working tree vs merge-base with `origin/<base>` (default `CONFIG.defaultBase`), so staging/committing the same change keeps it fresh |
-| `review-seal.mjs` | `node scripts/review-seal.mjs check [base]` · `write [base]` (same exit codes; imports `pr-precheck-seal.mjs`) | Opening a flow-sensitive PR with no independent (fresh-context) review of this exact diff. The reviewer writes it; `pr-preflight` (advisory) and the PR-creation command check it |
+| `review-seal.mjs` | `node scripts/review-seal.mjs check [base]` · `fingerprint [base]` (saves the exact diff to review) · `write [base] --expect <fp>` (refuses if the diff moved during the review; same exit codes; imports `pr-precheck-seal.mjs`) | Opening a flow-sensitive PR with no independent (fresh-context) review of this exact diff. The reviewer writes it; `pr-preflight` (advisory) and the PR-creation command check it |
 
 Skills referenced by name (`plan-feature`, `reflect`) are conventions: point `skill` at whatever
 your repo calls them, or drop the hook if you have none.

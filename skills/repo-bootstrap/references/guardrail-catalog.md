@@ -64,6 +64,7 @@ Roll out as `warn`, flip to `error` once clean.
 |---|---|---|---|
 | AI-config sync (`rulesync:check`) | hand-edited generated agent files drifting from source | rulesync | `ci/ci.yml` |
 | Lint + typecheck + tests (changed on PR, full on push) | regressions | always | `ci/ci.yml` |
+| Guard tests on every PR (`list-guard-tests`) | a guard test that reads files from disk never selected by changed-only runs, so the PR it should fail goes green | changed-only tests on PRs | `ci/ci.yml`, `ci/list-guard-tests.mjs` |
 | Parity checks (i18n, env docs) | registry drift | the registries exist | `ci/ci.yml` |
 | PR preflight strict | secrets and heavy binaries merged | always | `ci/ci.yml` |
 | Branch-policy guard (`pull_request_target`) | PRs into release branches from the wrong source | release branches | `ci/branch-policy-guard.yml` |
@@ -91,7 +92,7 @@ Roll out as `warn`, flip to `error` once clean.
 | Layer | Contents |
 |---|---|
 | deny | approving PRs; mutating `gh api` flags (`-f/-F/--field/--input/-X POST…`); reading `.env*`, keys, certificates; build/vendor dirs |
-| ask | destructive git, recursive delete, deploys, secrets CLIs, publishing, merging, force-kill, sudo, comments/reviews |
+| ask | destructive git, recursive delete, deploys, secrets CLIs, publishing, merging, force-kill, sudo, comments/reviews, third-party installs (`git clone`, MCP/plugin/skill adds, `pip`/`uv tool install`) so they go through quarantine first |
 | allow | read-only `gh`, tests, lint, typecheck, formatter check |
 
 Permissions are the first layer; the hooks are the second (they catch shapes globs miss).
@@ -122,3 +123,7 @@ Template: `rulesync/permissions.jsonc`.
 | Review type `independent \| self-check` + seal | the author session's own review passed off as the independent look | flow-sensitive lane | `skills/pr-review/`, `hooks/review-seal.mjs` |
 | Evidence-stamped final message (sha, clean/dirty, passed/failed/blocked/not run) | "verified" claims about a different commit, or evidence reused after the code changed | verify-integration in use | `skills/verify-integration/` |
 | Hazard search + "mitigation is not root cause" | a symptom patched while the same hazard stays live elsewhere | debugging skill in use | `skills/debugging/` |
+| Per-step validation by use case (happy, failure, legacy data) | a step built on an earlier one that was never checked; everything found broken at the end | any implementation | `rules/root.md` |
+| Findings recap at the end of every progress message | findings and pending decisions buried in earlier messages of a long run | loops, multi-step runs | `rules/root.md` |
+| Third-party quarantine (read in `.context/quarantine/`, install is an `ask`) | a skill, MCP or repo installed with hooks or scripts nobody read | any third-party install | `rules/root.md`, `rulesync/permissions.jsonc` |
+| Reflect escalates to a check (ladder, class-level on the second repeat, red first, shrink-only baseline, expiring exceptions, prune mode) | a correction written as prose that the next session ignores again | any repo with custom checks | `skills/reflect/`, `skills/reflect/references/checks.md` |

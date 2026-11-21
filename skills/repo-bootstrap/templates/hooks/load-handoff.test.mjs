@@ -34,13 +34,13 @@ describe('load-handoff: CLI', () => {
   it('prints the pointer for a fresh hand off of the current branch', () => {
     const repo = makeRepo({ 'a.js': 'a\n' }, 'main')
     put(repo, { '.context/handoff.md': `# Hand off\n\nbranch: main\nsha: x\nupdated: ${new Date().toISOString()}\n` })
-    const r = runScript('load-handoff.mjs', { stdin: JSON.stringify({ source: 'startup' }), env: { CLAUDE_PROJECT_DIR: repo } })
+    const r = runScript('load-handoff.mjs', { stdin: JSON.stringify({ source: 'startup' }), cwd: repo, env: { CLAUDE_PROJECT_DIR: repo } })
     assert.equal(r.status, 0)
     assert.equal(r.stdout.trim(), LOAD_MESSAGE)
   })
   it('is silent without a hand off and exits 0 on malformed stdin', () => {
     const repo = makeRepo()
-    const r = runScript('load-handoff.mjs', { stdin: 'nope', env: { CLAUDE_PROJECT_DIR: repo } })
+    const r = runScript('load-handoff.mjs', { stdin: 'nope', cwd: repo, env: { CLAUDE_PROJECT_DIR: repo } })
     assert.equal(r.status, 0)
     assert.equal(r.stdout, '')
   })

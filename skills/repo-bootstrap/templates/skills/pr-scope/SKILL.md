@@ -80,8 +80,9 @@ the hole from the PR**, not to grow the PR to defend it.
 
 - `node scripts/pr-precheck-seal.mjs check|write [base]` — the precheck already ran on this exact
   diff; a fresh seal skips a repeat run.
-- `node scripts/review-seal.mjs check|write [base]` — an independent (fresh-context) review ran on
-  this exact diff; written by `pr-review` with `Type: independent`.
+- `node scripts/review-seal.mjs check|fingerprint|write [base]` — an independent (fresh-context)
+  review ran on this exact diff; `fingerprint` at the start of the review, `write --expect <fp>`
+  at the end, by `pr-review` with `Type: independent`.
 
 ## Full reference
 

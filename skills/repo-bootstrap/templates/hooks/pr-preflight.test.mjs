@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { heavyFileReason, isRealEnvFile, envIgnoreWeakened, findProblems, isSensitivePath, reviewSealNotice, CONFIG } from './pr-preflight.mjs'
+import { computeFingerprint } from './pr-precheck-seal.mjs'
 import { reviewSealStatus, writeReviewSeal } from './review-seal.mjs'
 import { git, makeRepo, put, runScript } from './_helpers.mjs'
 
@@ -111,7 +112,7 @@ describe('pr-preflight: independent review seal notice (advisory)', () => {
   it('warns on a sensitive diff without a seal, silent once sealed', () => {
     const repo = featureRepo({ 'src/auth/login.ts': 'x' })
     assert.match(reviewSealNotice(repo, CONFIG, {}, reviewSealStatus), /Independent review missing/)
-    writeReviewSeal(repo, 'feat/x')
+    writeReviewSeal(repo, 'feat/x', 'main', computeFingerprint(repo, 'main'))
     assert.equal(reviewSealNotice(repo, CONFIG, {}, reviewSealStatus), null)
     put(repo, { 'src/auth/login.ts': 'changed' })
     assert.match(reviewSealNotice(repo, CONFIG, {}, reviewSealStatus), /Independent review stale/)

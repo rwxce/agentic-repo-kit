@@ -85,7 +85,14 @@ rule's name.
 and why; the user can say "big mode" / "quick mode". Normal and big features get a consumer
 sweep, docs first, the `docs/side-effect-registry.md` walk and an Invariants list; big ones
 (flow-sensitive, more than one domain, or new public entry points) also get the `plan-reviewer`
-agent in a fresh context. One-off fixes, copy tweaks and questions skip all of this.
+agent in a fresh context. One-off fixes, copy tweaks and questions skip all of this, except the
+use-case table when a fix changes behaviour by user state.
+<!-- optional: include if the repo uses pr-scope: "In a fresh workspace (no commits ahead of
+     `origin/<default branch>`) the plan carries the PR map right after the summary (pr-scope
+     pre-code mode)." -->
+
+**Loops.** Multi-item work runs as a loop only from a roadmap approved in plan mode, after the
+pre-loop questions: `plan-feature` steps 10-11 and `references/loop-roadmap.md`.
 <!-- optional: include if the tool supports prompt hooks (Claude Code `UserPromptSubmit`):
      "A hook (`<path to detect-feature-intent script>`) flags feature intent so the skill
      triggers without a slash command." -->
@@ -103,6 +110,13 @@ well-maintained, recent releases, compatible with our versions, covers our real 
 pin published ≥5 days ago** (no ranges; verify the publish date with `<registry view command>`,
 e.g. `npm view <pkg> time`). A two-line import usually beats a bespoke subsystem.
 
+## Third-party skills, MCPs and repos
+
+Before installing a third-party skill, MCP server, plugin or repo, clone or download it into
+`.context/quarantine/`, read its files (SKILL.md, hooks, scripts, install scripts in the package
+manifest, MCP config) and tell the user in one paragraph what it runs and what it can reach. The
+install command itself is an `ask` in the permissions file: the user decides.
+
 ## Git & Commits
 
 <!-- fill with: branches from `git branch -r` and CI triggers; default PR base; release flow -->
@@ -116,6 +130,7 @@ e.g. `npm view <pkg> time`). A two-line import usually beats a bespoke subsystem
   PR-creation flow require explicit permission for that operation.
 - Posting PR comments or reviews needs the user's explicit authorization for that publication;
   approving a PR is never done by an agent.
+- When working through a multi-step plan, keep implementing until the user reviews.
 - PRs from normal work go to `<default branch>`. <release/hotfix branch rules, if any>.
 - Never commit a hotfix directly to a release branch without landing it on `<default branch>` too.
 
@@ -189,13 +204,35 @@ implementer agents refuse to implement an entry point whose row is missing.
   not verification. If you cannot (no dev server, login blocked, backend not deployed to dev), say
   so explicitly: what was not verified, why, and what only the tests cover. Never imply it was seen.
   <!-- fill with: how to log into the app as a test user (a `local-test-login`-style skill) -->
+- **Width sweep.** Responsive or layout changes also get a sweep: resize slowly 320→1440 px and
+  back down (every ~20 px), not only the fixed widths — overlaps and wraps live between
+  breakpoints (`verify-integration`).
 - **Think ahead.** Before implementing, map what the change affects and how each piece should
   respond (including later steps such as retries, back, plan changes, old data), then compare
   expected vs observed. List in the plan the tools needed to verify; **ask the user for any that
   are missing before implementing**. If they cannot be provided, proceed only with the user's
   explicit OK as an exception and report what went unverified.
+- **Validate each step while building, by use case — not only at the end.** Before each step (a
+  function, migration, component or prompt), list the use cases it touches: the rows of the plan's
+  use-case table (transitions included) plus the readers/writers from the consumer sweep when
+  there is one. Right after the step, validate each one on the happy path, the failure path and
+  legacy data (an old row without the new field, an in-flight job, an entity created before the
+  change) where they apply — say so in one line when one doesn't. Use a test that reproduces the
+  scenario; add a real run in dev when the step has an effect outside the process (a DB write, an
+  external call, a scheduled job or webhook) — consecutive steps on the same path can share one
+  run — and a screenshot when there is UI. A trivial test that does not exercise the use case
+  does not count. Do not start the next step while an earlier one is red, or unverified without a
+  reason: whatever cannot be verified is named (why, who has to check it) and needs the user's OK
+  as in the item above; with that OK, continue. The end-to-end check above is still required.
 - If you add or remove an agent, skill, hook, custom lint rule, CI workflow, test kind or
   architectural rule, update `docs/blueprint.md` in the same change.
+
+<!-- optional: include if the repo has more than one way to run the app (local vs a public
+     tunnel/preview URL) -->
+**Which dev mode.** Default to local mode (`<local dev command>`) for running and testing. Use
+`<tunnel/preview mode>` only when the path needs a public URL (OAuth callbacks, incoming webhooks,
+a checkout return). Before starting a dev server or a test run, tell the user which mode you will
+use and why, and wait for their answer.
 
 ### Kill dev processes you start
 
@@ -250,8 +287,9 @@ use helpers that do not exist.
 ## Corrections
 
 When the user corrects you, fix it first, then apply the `reflect` skill in the same turn: it
-checks whether the correction repeats or states a standing preference and proposes a rule in
-`.rulesync/` (or the repo's rules home) or a memory, written only after a yes.
+checks whether the correction repeats or states a standing preference and proposes a check
+(type, lint rule, test, CI gate) first, else a rule in `.rulesync/` (or the repo's rules home) or a
+memory, written only after a yes.
 <!-- optional: "A hook (`<path>`) flags corrections" if the tool supports prompt hooks -->
 
 ## Codebase navigation
@@ -296,3 +334,8 @@ specific results.
   should confirm or change, and things they need to know (risks, shared environments touched,
   data left behind). One line each; outside the length limit. Omit it only when there is
   truly nothing.
+- **Findings recap in long runs.** In a loop or any multi-step run, every message that reports
+  progress ends with a **findings recap** (in the conversation's language): every finding,
+  blocker and pending decision since the user's last message, repeated there even if it was
+  already said higher up, so the user never has to scroll back through earlier messages. It sits
+  above "Pending for you" and is also outside the length limit.
