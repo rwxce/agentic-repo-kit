@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 — 2026-11-21
+
+System design phase, a concept catalog with 51 cards, opt-in product modules, recommended tools and language adapters, eleven new mechanisms, templates caught up with the reference repository, an MIT license with contributor docs, CI for the kit itself and an updated site.
 
 ### Added
 - Concept catalog: `references/concept-catalog.md` indexes 51 concept cards under
@@ -40,31 +42,6 @@
   issues off) and a pull request template.
 - `THIRD_PARTY.md` (root, site assets) and `skills/repo-bootstrap/THIRD_PARTY.md` (adapted
   templates, with the license texts; it travels with every install).
-
-### Changed
-- Site (en, ca, es): the "Design and concepts" section adds a product modules card (opt-in,
-  offered only on a repo signal; the legal module never writes final legal text); its cards sit in
-  a two-by-two grid on wide screens.
-- Site (en, ca, es) presents the new kit work: "How it works" follows the flow understand →
-  design → choose concepts → design controls → generate → verify → learn; a new "Design and
-  concepts" section covers the risk-sized system design, the concept catalog and the recommended
-  third-party tools installed through quarantine; the families list adds the review seal, reflect
-  with checks, guard tests, the hardened release, handoff, the Unicode firewall, the real build
-  artifact, the layout guard, Renovate with a minimum release age, OpenCode shims and the language
-  adapters; two new FAQ entries (other languages, license); the footer links CONTRIBUTING,
-  SECURITY and LICENSE; meta and share descriptions follow the new pitch.
-
-### Fixed
-- Attribution restored where templates adapt someone else's work: `diagram-picker.md` ("Mermaid
-  Studio" by Felipe Rodrigues / Tech Leads Club, CC BY 4.0, with the license link and the list of
-  changes), `debugging` (addyosmani/agent-skills, MIT) and `evidence-and-spikes.md` (ideas from
-  gsd-core, spec-kit and BMAD-METHOD). The templates index now says attribution comments stay in
-  the generated file.
-- Site (en, ca, es): the hero eyebrow stays on one line on phones, and content scrolling under the
-  sticky pill navbar fades out instead of showing through the gap above it.
-Templates brought up to date with the reference repo they were distilled from.
-
-### Added
 - `ci/list-guard-tests.mjs` (+ test): finds tests that read the repo from disk, which changed-only
   test runs never select; `ci.yml` runs them on every PR.
 - `skills/pr-review/references/pr-review.md`: the canonical review procedure (lane detection,
@@ -104,8 +81,38 @@ Templates brought up to date with the reference repo they were distilled from.
 - `hooks/opencode/agent-bash-guards.js` and `agent-handoff.js` (+ test): OpenCode plugin shims
   that reject what the "ask" guards would ask about, and feed `save-handoff` the session's last
   message and context size. `save-handoff.mjs` exports `handoffInputFromOpencodeMessages`.
+- `references/recommended-tools.md`: third-party skills, tools and MCP servers the kit proposes
+  but does not bundle. Each row gives the need, origin repo, version tested, license and the repo
+  overrides. It describes the quarantine step to follow before any install and flags MCP servers
+  run at `@latest` or unpinned as a risk. It also adds language adapters (lint rule +
+  architecture test) for Swift, Kotlin, Python, Go, Rust and Dart, with official links. Linked
+  from `SKILL.md` Phase 4.
+- Phase 1b, system design (`references/system-design.md`): sized by risk (light · standard ·
+  deep) with a method picker, so a local CLI gets one page and a SaaS with payments gets threat
+  modeling and FMEA. New projects go brief → observable requirements → context and trust
+  boundaries → risks and hypothesis gate → 2-4 alternatives on checkable criteria (maintenance
+  activity, license, CVEs of the exact version, breaking changes, modelled cost, lock-in; never
+  stars or scores out of 10) → ADRs → "go". Existing projects document the real design from
+  discovery lenses 1, 4 and 5, list risks, and migrate only with evidence.
+- Official sources per project type (Android, iOS, Flutter, Kotlin Multiplatform, SaaS web,
+  CLI/library), each URL checked to resolve.
+- Templates `system-design.md` and `adr.md`: every decision names the check that enforces it,
+  and those checks feed the Phase 4 proposal.
+- Four system design scenarios in `benchmark.md`, including a CLI that must receive nothing
+  superfluous.
 
 ### Changed
+- Site (en, ca, es): the "Design and concepts" section adds a product modules card (opt-in,
+  offered only on a repo signal; the legal module never writes final legal text); its cards sit in
+  a two-by-two grid on wide screens.
+- Site (en, ca, es) presents the new kit work: "How it works" follows the flow understand →
+  design → choose concepts → design controls → generate → verify → learn; a new "Design and
+  concepts" section covers the risk-sized system design, the concept catalog and the recommended
+  third-party tools installed through quarantine; the families list adds the review seal, reflect
+  with checks, guard tests, the hardened release, handoff, the Unicode firewall, the real build
+  artifact, the layout guard, Renovate with a minimum release age, OpenCode shims and the language
+  adapters; two new FAQ entries (other languages, license); the footer links CONTRIBUTING,
+  SECURITY and LICENSE; meta and share descriptions follow the new pitch.
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
   `write --expect <fp>` refuses when the diff changed during the review. Fixes a race where edits
   made while the review ran were sealed as reviewed. `pr-precheck-seal` exposes the shared
@@ -131,31 +138,19 @@ Templates brought up to date with the reference repo they were distilled from.
 - `verify-integration`: force use cases that do not happen on their own; width sweep.
 - `smoke-deploy`: optional env-fed auth headers for hosts behind an access proxy.
 - GitHub Actions bumped to Node 24 runtimes (checkout v5, setup-node v6, github-script v8).
-### Added
-- `references/recommended-tools.md`: third-party skills, tools and MCP servers the kit proposes
-  but does not bundle. Each row gives the need, origin repo, version tested, license and the repo
-  overrides. It describes the quarantine step to follow before any install and flags MCP servers
-  run at `@latest` or unpinned as a risk. It also adds language adapters (lint rule +
-  architecture test) for Swift, Kotlin, Python, Go, Rust and Dart, with official links. Linked
-  from `SKILL.md` Phase 4.
-- Phase 1b, system design (`references/system-design.md`): sized by risk (light · standard ·
-  deep) with a method picker, so a local CLI gets one page and a SaaS with payments gets threat
-  modeling and FMEA. New projects go brief → observable requirements → context and trust
-  boundaries → risks and hypothesis gate → 2-4 alternatives on checkable criteria (maintenance
-  activity, license, CVEs of the exact version, breaking changes, modelled cost, lock-in; never
-  stars or scores out of 10) → ADRs → "go". Existing projects document the real design from
-  discovery lenses 1, 4 and 5, list risks, and migrate only with evidence.
-- Official sources per project type (Android, iOS, Flutter, Kotlin Multiplatform, SaaS web,
-  CLI/library), each URL checked to resolve.
-- Templates `system-design.md` and `adr.md`: every decision names the check that enforces it,
-  and those checks feed the Phase 4 proposal.
-- Four system design scenarios in `benchmark.md`, including a CLI that must receive nothing
-  superfluous.
-
-### Changed
 - Flow: understand → design → propose → generate → verify → learn. `SKILL.md`, the README
   diagram and the templates index include the new phase.
 - CI workflow (`ci.yml`): template tests, the kit's guard tests and the skill lint on every pull request and push to `dev`.
+
+### Fixed
+- Attribution restored where templates adapt someone else's work: `diagram-picker.md` ("Mermaid
+  Studio" by Felipe Rodrigues / Tech Leads Club, CC BY 4.0, with the license link and the list of
+  changes), `debugging` (addyosmani/agent-skills, MIT) and `evidence-and-spikes.md` (ideas from
+  gsd-core, spec-kit and BMAD-METHOD). The templates index now says attribution comments stay in
+  the generated file.
+- Site (en, ca, es): the hero eyebrow stays on one line on phones, and content scrolling under the
+  sticky pill navbar fades out instead of showing through the gap above it.
+Templates brought up to date with the reference repo they were distilled from.
 
 ## 0.5.0 — 2026-11-21
 
