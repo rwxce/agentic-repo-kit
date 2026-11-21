@@ -14,6 +14,22 @@
   checks). Every source URL was checked; cards with no primary source say "None found".
 - `decision-matrix.md`: a "Project signal → concepts" table.
 - `guardrail-catalog.md`: "When not" and "Origin" columns on every table.
+- Product modules, opt-in and proposed only on a repo signal (`references/product-modules.md`,
+  Phase 0 question 9, a "Project signal → product modules" table in `decision-matrix.md`):
+  - Design: `PRODUCT.md` and `DESIGN.md` templates, DTCG 2025.10 tokens with `check-tokens.mjs`,
+    a UI surfaces inventory with `check-ui-surfaces.mjs`, the design tool → artifact → real
+    components flow, per-skill overrides and a `ui-router` agent.
+  - Legal: a `legal-compliance` skill (inventory from the code, discrepancies, founder questions,
+    LIA, processors, retention) with a jurisdiction → obligations → official source table; every
+    URL opened on 2026-11-21. It never writes final legal text.
+  - Content: a typed content registry with a guard that also fails stale third-party facts, a
+    `content-writing` skill for posts and comparison pages, and a generic `changelog-entry` skill.
+  - Copy: positioning and tone templates, a translation glossary with `check-glossary.mjs`.
+  - Product AI: model ids per environment, a strict structured-output schema converter, prompt
+    version and cost-per-feature patterns, a blind-judge eval procedure.
+  - Growth: plans as data with server-side checks and a limit → feature table, a price-literal check.
+  - Dev environment: a local launcher (free port, app URLs on localhost), a `test-login` skill with
+    a triple guard, and the secrets-folder-per-provider pattern.
 - `tests/concept-catalog.test.mjs`: guard test that fails when a card loses a field, is missing
   from the index or the signal table, or has a broken relative link (`node --test tests/*.test.mjs`).
 - `LICENSE` (MIT), `SECURITY.md` (private reporting through GitHub security advisories, scope, no
@@ -26,6 +42,9 @@
   templates, with the license texts; it travels with every install).
 
 ### Changed
+- Site (en, ca, es): the "Design and concepts" section adds a product modules card (opt-in,
+  offered only on a repo signal; the legal module never writes final legal text); its cards sit in
+  a two-by-two grid on wide screens.
 - Site (en, ca, es) presents the new kit work: "How it works" follows the flow understand →
   design → choose concepts → design controls → generate → verify → learn; a new "Design and
   concepts" section covers the risk-sized system design, the concept catalog and the recommended

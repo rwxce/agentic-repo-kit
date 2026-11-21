@@ -103,6 +103,7 @@ flowchart TD
 | Depth | quick · full (with benchmark) |
 | Output | proposal only · proposal then generation · number of PRs |
 | Language | chat in yours; artifacts in English by default |
+| Product modules | only those your repo shows a signal for: design · legal · content · copy · product AI · growth · dev environment |
 
 ### What it can set up
 
@@ -122,6 +123,18 @@ Nothing gets proposed without a signal in your repo that justifies it.
 | Permissions | deny → ask → allow layers for shell, secrets and outward actions |
 | Registries | side-effect registry · blueprint (inventory) · environment variables · use-case matrix · UI surfaces |
 | MCP servers | official servers for the services you use, with prod/sandbox split. Proposed only, never installed without your OK |
+
+**Product modules** are opt-in and appear only when the repo shows their signal (a CLI gets none):
+
+| Module | Examples |
+|---|---|
+| Design | `PRODUCT.md` · `DESIGN.md` · DTCG tokens + check · UI surfaces inventory + guard · design tool → artifact → real components · per-skill overrides · UI router agent |
+| Legal | `legal-compliance` skill: inventory from the code → discrepancies → founder questions → LIA, processors, retention; jurisdiction → obligation → official source. Never final legal text |
+| Content | typed content registry + guard (dated third-party facts) · `content-writing` skill for posts and comparison pages · `changelog-entry` skill · `llms.txt` optional |
+| Copy | positioning · tone · translation glossary + check · i18n parity |
+| Product AI | model ids per environment · strict schema · prompt version · cost per feature · blind-judge eval |
+| Growth | plans as data · server-side gating · limit → feature table · no literal prices |
+| Dev environment | local vs tunnel launcher · `test-login` skill · secrets folder per provider |
 
 The full catalog, with the failure behind each item, is in
 [`skills/repo-bootstrap/references/guardrail-catalog.md`](skills/repo-bootstrap/references/guardrail-catalog.md).
@@ -149,20 +162,22 @@ skills/repo-bootstrap/
   references/              loaded on demand: options menu, discovery lenses, system design,
                            code style, benchmark, decision matrix, guardrail catalog,
                            concept catalog (+ concepts/), MCP discovery, rulesync,
-                           recommended tools
+                           recommended tools, product modules
   templates/               system design + ADR, rules, agents, skills, commands, registries,
-                           hooks (+ tests), arch tests, test guards, lint, CI, automations
+                           hooks (+ tests), arch tests, test guards, lint, CI, automations,
+                           product modules (product/)
 ```
 
 Third-party material and its licenses: [`THIRD_PARTY.md`](THIRD_PARTY.md).
 
 ## Developing
 
-The script templates (hooks, CI, automations, lint) have no dependencies and are tested with
-Node's built-in runner:
+The script templates (hooks, CI, automations, lint, product modules) have no dependencies and are
+tested with Node's built-in runner (Node 22.18 or later: the product modules' `.ts` templates are
+type-stripped):
 
 ```bash
-node --test skills/repo-bootstrap/templates/**/*.test.mjs
+node --test "skills/repo-bootstrap/templates/**/*.test.mjs"
 ```
 
 A guard test checks the concept catalog (every card has its eight fields, is listed in

@@ -63,7 +63,7 @@ strongest for diffs. Allow a one-call upgrade of an implementer for big creative
 | PR workflow | `pr-review` (diff-based, security/regressions first, no nits, `Type: independent \| self-check` + review seal) and a PR-creation command |
 | Review-heavy PRs that keep growing | `pr-scope` (freeze scope, route out-of-scope findings to follow-up PRs) + `pr-triage` command |
 | Asks often arrive underspecified | `interview-me` (one question at a time, each with a guess, before any plan) |
-| Auth + UI | a test-login skill (throwaway test user, reach states without the human) |
+| Auth + UI | a test-login skill (throwaway test user, reach states without the human) — template `skills/test-login/` (dev-env module) |
 | Repeated multi-step workflow found in docs/scripts (release, seed, data fix) | a project skill for it |
 
 ## Hooks, tests, lint, CI, automations, permissions, registries
@@ -121,6 +121,29 @@ validate, not proven practice.
 | More than one agent tool in use | `generated-agent-config` |
 | Daily agent use; long sessions resumed across chats | `corrections-become-rules`, `session-handoff` |
 | Medium or large codebase explored by agents | `code-graph-navigation` |
+
+## Project signal → product modules
+
+Opt-in, one level above the families (`product-modules.md`). Offer a module only on its signal;
+propose only the pieces whose own signal is present. No signal → no module ("a CLI gets none").
+
+| Signal found in the scan or discovery | Module · first pieces to propose |
+|---|---|
+| User-facing UI that agents design for | Design · `PRODUCT.md`, `DESIGN.md`, `ui-surfaces.md` + guard |
+| A theme, Tailwind config or token file | Design · DTCG `tokens.tokens.json` + `check-tokens.mjs` (with `--css` for web) |
+| Vendored design skills installed (≥1) and a UI domain with ≥5 build rules | Design · `skill-overrides.md` + `agents/ui-router.md` |
+| Team explores in a design tool (exports, artifact links in PRs) | Design · `design-flow.md` |
+| Personal data, analytics/replay SDKs, cookies or local storage, payments, uploads, published legal pages | Legal · `legal-compliance` skill (+ root `## Compliance` section and tripwire hook) |
+| Blog, guides or comparison pages on the product site | Content · `content-registry.ts` + test, `content-writing` skill |
+| Public "what's new" page | Content · `changelog-entry` skill, changelog in the registry |
+| Marketing site or onboarding copy | Copy · `positioning.md`, `tone.md` |
+| 2+ locale files | Copy · `glossary.json` + `check-glossary.mjs`, `i18n-parity.mjs` |
+| LLM calls in product code | Product AI · `model-ids.ts`, `strict-json-schema.mjs`, prompt version, cost log |
+| A model choice or prompt that changes over time | Product AI · `eval.md` |
+| Billing SDK, plans, quotas, trials | Growth · `plans.ts` + test, `check-hardcoded-prices.mjs` |
+| App URL vars pointing to a tunnel/shared host; parallel worktrees | Dev env · `dev-local.mjs`, local-vs-tunnel table |
+| Auth plus UI behind it | Dev env · `test-login` skill |
+| A secrets store synced to several runtimes | Dev env · secrets folder per provider (env registry) |
 
 ## MCP servers
 From Lens 4: one row per external service with an **official** MCP. See `mcp-discovery.md`.
