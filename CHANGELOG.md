@@ -14,6 +14,22 @@
   checks). Every source URL was checked; cards with no primary source say "None found".
 - `decision-matrix.md`: a "Project signal → concepts" table.
 - `guardrail-catalog.md`: "When not" and "Origin" columns on every table.
+- Product modules, opt-in and proposed only on a repo signal (`references/product-modules.md`,
+  Phase 0 question 9, a "Project signal → product modules" table in `decision-matrix.md`):
+  - Design: `PRODUCT.md` and `DESIGN.md` templates, DTCG 2025.10 tokens with `check-tokens.mjs`,
+    a UI surfaces inventory with `check-ui-surfaces.mjs`, the design tool → artifact → real
+    components flow, per-skill overrides and a `ui-router` agent.
+  - Legal: a `legal-compliance` skill (inventory from the code, discrepancies, founder questions,
+    LIA, processors, retention) with a jurisdiction → obligations → official source table; every
+    URL opened on 2026-11-21. It never writes final legal text.
+  - Content: a typed content registry with a guard that also fails stale third-party facts, a
+    `content-writing` skill for posts and comparison pages, and a generic `changelog-entry` skill.
+  - Copy: positioning and tone templates, a translation glossary with `check-glossary.mjs`.
+  - Product AI: model ids per environment, a strict structured-output schema converter, prompt
+    version and cost-per-feature patterns, a blind-judge eval procedure.
+  - Growth: plans as data with server-side checks and a limit → feature table, a price-literal check.
+  - Dev environment: a local launcher (free port, app URLs on localhost), a `test-login` skill with
+    a triple guard, and the secrets-folder-per-provider pattern.
 
 ## 0.5.0 — 2026-11-21
 

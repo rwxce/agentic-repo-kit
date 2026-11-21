@@ -37,7 +37,9 @@ failure; the "why" of each piece lives in `references/guardrail-catalog.md`.
 **Light scan (≤10 tool calls, read-only):** root files and manifests (package.json/pyproject/go.mod/
 Cargo.toml…), lockfile → package manager, `git log --oneline | head` and commit count, amount of
 source code, existing AI config (`CLAUDE.md`, `AGENTS.md`, `.claude/`, `.cursor/`, `.rulesync/`,
-`.codex/`, `.opencode/`), CI (`.github/workflows/`, others), test runner, linter/formatter configs.
+`.codex/`, `.opencode/`), CI (`.github/workflows/`, others), test runner, linter/formatter configs,
+and product-module signals (UI, legal pages, content, locales, AI, billing, dev runtimes —
+`references/product-modules.md`).
 
 **Then present the whole menu** — every option with one line on what it is, rough cost, and your
 recommendation based on the scan. Use `AskUserQuestion` when available (max 4 questions per call,
@@ -53,6 +55,7 @@ two rounds); otherwise a numbered list in chat. Full option texts: `references/o
 | 6 | Depth | quick (no benchmark) · full (benchmark with a big feature, ~200-300k tokens) |
 | 7 | Output | proposal only · proposal then generation after "go" · how many PRs |
 | 8 | Language | chat language (default: the user's) · artifacts language (default: English) |
+| 9 | Product modules (multi, only those with a signal; skipped when none) | design · legal · content · copy · product AI · growth · dev environment |
 
 Record the answers in `.context/repo-bootstrap/choices.md`. From here on, only the chosen families
 are analysed and proposed. If the user picks "only one family", skip straight to that family's part
@@ -64,7 +67,9 @@ of Phase 2/3.
 Short interview (one question at a time, each with your guess attached) until you can predict the
 next three answers: product and users, stack (or candidates), sensitive domains (money, auth,
 personal data, external publishing, legal promises), team size and review model, tools used,
-deploy target, environments (dev/stage/prod, sandboxes). Then go to Phase 3 using templates.
+deploy target, environments (dev/stage/prod, sandboxes), and which product surfaces it will have
+(UI, legal pages, blog, locales, AI features, paid plans) so the product modules can be offered.
+Then go to Phase 3 using templates.
 
 ### Existing project
 Launch the discovery lenses **in parallel**, each a read-only subagent returning only a compact
@@ -112,6 +117,8 @@ For engineering concepts (auth boundary, webhooks, jobs, migrations, pooling, ba
 use the matrix's "Project signal → concepts" table and open only the matching cards from
 `references/concept-catalog.md`; each card names the check that verifies it and when it does not
 apply. External cards are proposals to validate, not proven practice.
+For the product modules chosen in question 9, use `references/product-modules.md` and the README
+of each `templates/product/<module>/`; propose only the pieces whose signal is present.
 Write the proposal to `.context/repo-bootstrap/proposal.md` and summarize it in chat.
 
 Format — one table per chosen family, one row per artifact:
@@ -125,6 +132,8 @@ Then:
   why — and which domains deliberately get *no* agent yet.
 - **MCP table**: service · official MCP (url) · maintainer · auth · scopes · prod/sandbox · install
   command — marked "needs your OK".
+- **Product modules** (if chosen): one table per module in the format above; modules with no
+  signal are listed as "none (no signal)" in one line.
 - **Later**: things considered and deferred, with the signal that would justify them.
 - **PR map**: e.g. (1) rulesync + root rules + registries, (2) hooks + permissions, (3) agents +
   skills + commands, (4) architecture tests + lint (as `warn`), (5) CI, (6) refactor plan if chosen.
@@ -188,4 +197,5 @@ Migrating loose config into rulesync is an import with an audit table — nothin
 | `references/concept-catalog.md` | Phase 4, only the concept cards a repo signal points to (`references/concepts/<slug>.md`) |
 | `references/mcp-discovery.md` | Phase 4, MCP family |
 | `references/rulesync.md` | Phase 4/5, when rulesync is chosen |
+| `references/product-modules.md` | Phase 0 (signals) and Phase 4, only when a product-module signal exists |
 | `templates/README.md` | Phase 5, index of every template |

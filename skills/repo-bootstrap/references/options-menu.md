@@ -63,4 +63,22 @@ light scan ("Recommended because …"). Never pre-decide silently. Two rounds of
 **8. Language**
 - Chat: the user's language (default). Artifacts: English (default) or another.
 
+**9. Product modules** (multi-select; asked only when the light scan found at least one signal,
+otherwise recorded as "none (no signal)"; in a new project, from the interview's product surfaces)
+- Show only the modules with a signal, each with the signal found and a one-line cost. Full list
+  and signals: `product-modules.md`.
+- *Design* — PRODUCT.md, DESIGN.md, DTCG tokens + check, UI surfaces inventory + guard, design flow,
+  skill overrides, UI router agent.
+- *Legal* — evidence-first compliance skill (inventory → discrepancies → founder questions → LIA,
+  processors, retention); never final legal text.
+- *Content* — typed content registry + guard (dated third-party facts), writing skill for posts and
+  comparison pages, changelog skill.
+- *Copy* — positioning, tone, translation glossary + check, i18n parity.
+- *Product AI* — model ids per environment, strict schema, prompt version, cost per feature, eval.
+- *Growth* — plans as data, server-side gating, limit → feature table, no literal prices.
+- *Dev environment* — local vs tunnel launcher, test-login skill, secrets folder per provider.
+Recommend from the signals; a module the user picks without a signal goes to *Later*. With
+`AskUserQuestion`, this is a third call (max 4 options shown: the strongest signals first, the rest
+in "Other").
+
 Save answers to `.context/repo-bootstrap/choices.md` as a short list; quote it in the proposal.
