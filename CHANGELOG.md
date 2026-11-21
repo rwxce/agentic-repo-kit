@@ -42,6 +42,9 @@
   templates, with the license texts; it travels with every install).
 
 ### Changed
+- Site (en, ca, es): the "Design and concepts" section adds a product modules card (opt-in,
+  offered only on a repo signal; the legal module never writes final legal text); its cards sit in
+  a two-by-two grid on wide screens.
 - Site (en, ca, es) presents the new kit work: "How it works" follows the flow understand →
   design → choose concepts → design controls → generate → verify → learn; a new "Design and
   concepts" section covers the risk-sized system design, the concept catalog and the recommended

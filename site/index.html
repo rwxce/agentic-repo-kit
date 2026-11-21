@@ -232,7 +232,7 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 <h2 style="margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(2.2rem,4.8vw,4.4rem); line-height: 0.98; letter-spacing: -0.045em; color: var(--lp-head); text-wrap: balance">Every decision names <span style="color: var(--lp-accent)">the check that holds it</span>.</h2>
 <p style="margin: 0; font-size: 18px; color: var(--lp-body); text-wrap: pretty">Before it proposes a single hook, the kit works out what your project needs and how each choice will be enforced. Depth follows risk: a local CLI gets one page, a SaaS with payments gets threat modeling.</p>
 </div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 16px">
 <div style="display: flex; flex-direction: column; gap: 12px; padding: 28px; background: var(--lp-soft); border: 1px solid var(--lp-line); border-radius: 14px">
 <p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">System design</p>
 <h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Sized by risk</h3>
@@ -247,6 +247,11 @@ cp -R agentic-repo-kit/skills/repo-bootstrap ~/.claude/skills/</pre>
 <p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Recommended tools</p>
 <h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Third-party, through quarantine</h3>
 <p style="margin: 0; font-size: 15px; color: var(--lp-body)">Skills, CLIs and MCP servers the kit proposes but does not bundle, each with its origin, the version tested and its license. Before any install it reads their files, tells you what they run and what they can reach, and waits for your OK.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 28px; background: var(--lp-soft); border: 1px solid var(--lp-line); border-radius: 14px">
+<p style="margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lp-accent)">Product modules</p>
+<h3 style="margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.3rem,2vw,1.6rem); letter-spacing: -0.03em; color: var(--lp-head)">Opt-in, only on a signal</h3>
+<p style="margin: 0; font-size: 15px; color: var(--lp-body)">Design (product and design docs, tokens, a UI inventory), legal (an inventory built from the code and questions for you), content and changelog, copy and translation glossary, product AI, plans as data, and a local dev launcher. Each one is offered only when the repo shows the surface it covers, with zero-dependency checks. The legal module never writes final legal text.</p>
 </div>
 </div>
 </div>
