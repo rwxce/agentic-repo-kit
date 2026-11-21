@@ -1,0 +1,24 @@
+{
+  "$comment": "TEMPLATE translation glossary. sourceLocale is the locale every other one is translated from. Each term: the source word (and its inflected sourceForms), its approved forms per locale (\"*\" = keep it untranslated in every locale), words to avoid per locale, and a note for translators. Replace the sample terms. Checked by check-glossary.mjs.",
+  "sourceLocale": "en",
+  "terms": [
+    {
+      "term": "Acme Pilot",
+      "note": "Feature name: never translated.",
+      "translations": { "*": ["Acme Pilot"] }
+    },
+    {
+      "term": "post",
+      "sourceForms": ["post", "posts"],
+      "note": "One published piece of content. Not 'entrada' (reads as a blog entry).",
+      "translations": { "es": ["publicación", "publicaciones"], "ca": ["publicació", "publicacions"] },
+      "avoid": { "es": ["entrada", "entradas"], "ca": ["entrada", "entrades"] }
+    },
+    {
+      "term": "workspace",
+      "sourceForms": ["workspace", "workspaces"],
+      "note": "The container for one product. Use the local word, not the English one.",
+      "translations": { "es": ["espacio de trabajo", "espacios de trabajo"], "ca": ["espai de treball", "espais de treball"] }
+    }
+  ]
+}
