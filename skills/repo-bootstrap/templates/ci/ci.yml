@@ -1,0 +1,105 @@
+# WHAT: Main CI workflow: frozen install, AI-config drift check, lint, typecheck, parity checks,
+#   PR preflight, tests (changed-only on PRs, full on pushes to the integration branch).
+# REPO SIGNAL: a lockfile, generated AI config (rulesync or similar), lint/typecheck/test scripts.
+# CONFIGURE: <integration-branch>, <package-manager> steps, and the `run --if-present` scripts you
+#   actually have. Steps whose script is missing are skipped, so the file is safe to adopt before the
+#   scripts exist. Node version is read from .nvmrc, else package.json "engines.node".
+name: CI
+
+on:
+  push:
+    branches: [<integration-branch>]
+  pull_request:
+    branches: [<integration-branch>]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest # <or your faster runner label>
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Preflight and --changed need `git merge-base` against the base branch: a depth-1
+          # checkout cannot compute it.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Pick the Node version source
+        id: node
+        run: |
+          if [ -f .nvmrc ]; then echo "file=.nvmrc" >> "$GITHUB_OUTPUT"
+          elif [ -f .node-version ]; then echo "file=.node-version" >> "$GITHUB_OUTPUT"
+          else echo "file=package.json" >> "$GITHUB_OUTPUT"; fi   # setup-node reads engines.node
+
+      # pnpm shown. npm: drop corepack + use `npm ci`. yarn: `corepack enable` + `yarn install --immutable`.
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ steps.node.outputs.file }}
+          cache: pnpm
+
+      # Frozen lockfile: CI must fail when package.json and the lockfile disagree.
+      - run: pnpm install --frozen-lockfile
+
+      # Generated AI/editor configs (.claude/, .cursor/, AGENTS.md...) must equal what the source of
+      # truth generates. Hand edits to generated files fail here instead of drifting silently.
+      - run: pnpm run --if-present rulesync:check
+
+      - run: pnpm run --if-present lint
+
+      # <CODEGEN HOOK> frameworks whose typecheck needs generated types (ORM client, API schema,
+      # route types) run codegen here, BEFORE typecheck, against a throwaway local backend rather
+      # than a real deployment key: a rotated key must not break CI and nothing may be pushed.
+      # - run: pnpm run codegen
+
+      - run: pnpm run --if-present typecheck
+
+      # Parity checks: each is a script that exits non-zero on drift (see ../arch-tests).
+      - run: pnpm run --if-present check:i18n
+      - run: pnpm run --if-present check:vendored
+
+      - name: Fetch branch refs for the preflight
+        # actions/checkout fetches only the ref under test; `git fetch origin <b>` alone fills
+        # FETCH_HEAD, not refs/remotes/origin/<b>. Fetch with an explicit destination, and also the
+        # PR's real base (it may be a release/vX.Y.Z branch outside the usual list).
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin <integration-branch>:refs/remotes/origin/<integration-branch> || true
+          if [ -n "$BASE_REF" ]; then
+            git fetch --no-tags origin "$BASE_REF:refs/remotes/origin/$BASE_REF" || true
+          fi
+
+      # Diff-based preflight (e.g. "schema changed but migration missing", oversized files). Give it
+      # the event's real base rather than letting it guess.
+      - run: pnpm run --if-present check:pr
+        env:
+          PR_BASE_REF: ${{ github.base_ref }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+
+      - name: Run tests
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            if ! git rev-parse --verify "refs/remotes/origin/$BASE_REF" >/dev/null 2>&1; then
+              # The fetch step swallows errors on purpose; do not guess silently -- run everything.
+              echo "::error::origin/$BASE_REF missing; falling back to the full suite"
+              pnpm test
+              exit 0
+            fi
+            # vitest: --changed <ref>. jest: --changedSince=<ref>. Both walk the module graph.
+            pnpm exec vitest run --changed "origin/$BASE_REF"
+          else
+            # Full suite on push: --changed can miss a test broken indirectly (via a mock or a
+            # dependency the module graph does not trace). This is the safety net.
+            pnpm test
+          fi

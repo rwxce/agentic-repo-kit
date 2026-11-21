@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/session-start-status.mjs",
+        "timeout": 10
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/load-handoff.mjs",
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "matcher": "Bash",
+        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/block-outward-writes.mjs\"",
+        "timeout": 10,
+        "failClosed": true
+      },
+      {
+        "type": "command",
+        "matcher": "Bash",
+        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/protect-branches.mjs\"",
+        "timeout": 10
+      },
+      {
+        "type": "command",
+        "matcher": "Grep|Glob",
+        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/index-reminder.mjs\"",
+        "timeout": 5
+      },
+      {
+        "type": "command",
+        "matcher": "Bash",
+        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/guard-dangerous-commands.mjs\"",
+        "timeout": 10
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "type": "command",
+        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/detect-correction.mjs\"",
+        "timeout": 5
+      },
+      {
+        "type": "command",
+        "command": "node \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}/scripts/detect-feature-intent.mjs\"",
+        "timeout": 5
+      }
+    ],
+    "stop": [
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/lint-if-changed.mjs",
+        "timeout": 60
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/compliance-tripwire.mjs",
+        "timeout": 30
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/branch-policy.mjs",
+        "timeout": 30
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/pr-preflight.mjs",
+        "timeout": 30
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/check-env-docs.mjs",
+        "timeout": 30
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/index-refresh.mjs",
+        "timeout": 120
+      },
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/save-handoff.mjs",
+        "timeout": 10
+      }
+    ],
+    "preCompact": [
+      {
+        "type": "command",
+        "command": "cd \"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}\" && node scripts/save-handoff.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+# WHAT: Optional gate. A PR that adds a data migration must link an open "Contract: <name>" issue
+#   (the issue that tracks the later, destructive "contract" step of expand/migrate/contract).
+# REPO SIGNAL: schema migrations live in one registry file (e.g. migrations.ts) AND the repo uses
+#   expand/migrate/contract for deprecations. Without the issue, the "contract" step is forgotten and
+#   dead columns live forever. Skip if you have no such process.
+# CONFIGURE: MIGRATIONS_FILE, DEFINITION_REGEX (one capture group = migration name), LABEL.
+name: Migration contract gate
+
+on:
+  # Trusted version from the base branch. Never checks out or runs PR code: it only reads the PR's
+  # file list, body and issues through the API. `edited` is included so fixing the PR body re-runs
+  # the check and clears it.
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches: [<integration-branch>]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: migration-contract-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  require-contract-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          MIGRATIONS_FILE: <path/to/migrations-file>
+          # Matches ADDED lines of the unified diff; group 1 is the migration name.
+          DEFINITION_REGEX: '^\+export const (\w+) = <migrations>\.define'
+          LABEL: schema-contract
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+            const { MIGRATIONS_FILE, DEFINITION_REGEX, LABEL } = process.env;
+
+            // Re-read the PR: an `edited` run queued behind a later edit must see the current body.
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: prNumber, per_page: 100 });
+            const file = files.find((f) => f.filename === MIGRATIONS_FILE);
+            if (!file) return core.info(`${MIGRATIONS_FILE} untouched; nothing to check.`);
+
+            // Fail CLOSED: GitHub omits `patch` for very large diffs, so we cannot read the names.
+            if (file.patch === undefined) {
+              return core.setFailed(`${MIGRATIONS_FILE} has no patch in the API response (diff too large). Split the change, or have a maintainer verify the contract issues by hand.`);
+            }
+            const names = [...file.patch.matchAll(new RegExp(DEFINITION_REGEX, 'gm'))].map((m) => m[1]);
+            if (names.length === 0) return core.info('No migrations added; nothing to check.');
+
+            const open = await github.paginate(github.rest.issues.listForRepo, { owner, repo, labels: LABEL, state: 'open', per_page: 100 });
+            const byTitle = new Map(open.filter((i) => !i.pull_request).map((i) => [i.title, i]));
+            const body = pr.body ?? '';
+            // `#12` must not match inside `#123`.
+            const linked = (n) => new RegExp(`#${n}(?!\\d)`).test(body);
+
+            const missingIssue = [], missingLink = [];
+            for (const name of names) {
+              const issue = byTitle.get(`Contract: ${name}`);
+              if (!issue) missingIssue.push(name);
+              else if (!linked(issue.number)) missingLink.push({ name, number: issue.number });
+            }
+            if (!missingIssue.length && !missingLink.length) return;
+
+            const lines = [`Every migration needs an open "Contract: <name>" issue labelled "${LABEL}", linked as #<number> in the PR body, before merge.`, ''];
+            for (const n of missingIssue) lines.push(`No open issue for ${n}: create one titled exactly "Contract: ${n}" with the label, then link it.`);
+            for (const m of missingLink) lines.push(`${m.name}: issue exists but add #${m.number} to the PR body.`);
+            lines.push('', 'Editing the PR body re-runs this check.');
+            core.setFailed(lines.join('\n'));

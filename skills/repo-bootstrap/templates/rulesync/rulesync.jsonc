@@ -1,0 +1,16 @@
+// Template: rulesync config. Signal: rulesync chosen in Phase 0. Keep only the targets the team uses;
+// confirm supported features per target in the current rulesync docs. Remove this header line block.
+{
+  "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/config-schema.json",
+  // Single source of truth lives in .rulesync/ — edit there, then run the generator.
+  // Generated files are tracked but must not be hand-edited; CI runs the sync check.
+  "targets": {
+    "claudecode": ["rules", "ignore", "mcp", "commands", "subagents", "skills", "hooks", "permissions"],
+    "cursor":     ["rules", "ignore", "mcp", "commands", "subagents", "skills", "hooks", "permissions"],
+    "codexcli":   ["rules", "mcp", "subagents", "skills", "hooks", "permissions"],
+    "opencode":   ["rules", "mcp", "commands", "subagents", "skills", "hooks", "permissions"]
+  },
+  "outputRoots": ["."],
+  // Keep false until you confirm it never deletes hand-maintained tool-specific files.
+  "delete": false
+}

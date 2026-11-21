@@ -1,0 +1,67 @@
+# WHAT: Applies the review-lane label and requests the cross-reviewer, using review-routing.mjs.
+# REPO SIGNAL: see review-routing.mjs. CONFIGURE: <integration-branch>, the bot assignee fallback.
+# Copy review-routing.mjs to .github/scripts/ and this file to .github/workflows/.
+name: Route PR review
+
+on:
+  # Trusted version from the base branch. The policy script is checked out at the BASE sha with a
+  # sparse checkout, so PR code is never executed with write permissions.
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize, ready_for_review]
+    branches: [<integration-branch>]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { classifyReview, reviewerFor, REVIEW_LABELS } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/review-routing.mjs`);
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+            const issue_number = pr.number;
+
+            // Bots (dependency updaters) cannot always be assigned and have no cross-reviewer.
+            if (pr.user.type === 'Bot') return;
+            try { await github.rest.issues.addAssignees({ owner, repo, issue_number, assignees: [pr.user.login] }); }
+            catch (e) { core.warning(`Could not assign: ${e.message}`); }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: issue_number, per_page: 100 });
+            const { flowSensitive, sensitiveFiles } = classifyReview({
+              author: pr.user.login,
+              body: pr.body ?? '',
+              paths: files.map((f) => f.filename),
+              labels: pr.labels.map((l) => l.name),
+            });
+
+            const add = flowSensitive ? REVIEW_LABELS.human : REVIEW_LABELS.evidence;
+            const drop = flowSensitive ? REVIEW_LABELS.evidence : REVIEW_LABELS.human;
+            // Create labels on first use; tolerate a concurrent PR creating them (422).
+            for (const name of [add]) {
+              try { await github.rest.issues.getLabel({ owner, repo, name }); }
+              catch (e) { if (e.status !== 404) throw e; await github.rest.issues.createLabel({ owner, repo, name }).catch((c) => { if (c.status !== 422) throw c; }); }
+            }
+            await github.rest.issues.removeLabel({ owner, repo, issue_number, name: drop }).catch((e) => { if (e.status !== 404) throw e; });
+            await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [add] });
+
+            core.summary.addHeading('PR review routing')
+              .addRaw(`Lane: **${flowSensitive ? 'flow-sensitive' : 'demonstrable'}**\n\nSensitive files: ${sensitiveFiles.map((p) => `\`${p}\``).join(', ') || 'none'}\n`)
+              .write();
+
+            if (pr.draft) return;
+            const reviewer = reviewerFor(pr.user.login);
+            if (!reviewer) return core.warning(`No cross-reviewer for ${pr.user.login}; PR stays human-required.`);
+            await github.rest.pulls.requestReviewers({ owner, repo, pull_number: issue_number, reviewers: [reviewer] })
+              .catch((e) => core.warning(`Could not request ${reviewer}: ${e.message}`));

@@ -1,0 +1,45 @@
+# WHAT: Enforces the branch/promotion model: protected branches accept PRs only from allowed
+#   sources (e.g. production accepts none, staging accepts only release/* branches).
+# REPO SIGNAL: a multi-stage flow (dev -> stage -> main) and at least one "someone merged the wrong
+#   branch into stage/main" incident. Skip for single-branch repos.
+# CONFIGURE: the `branches` list and the `case` below. Pair it with GitHub rulesets (required checks,
+#   no force-push) -- this guard explains the rule; the ruleset enforces it.
+name: Branch policy guard
+
+on:
+  # pull_request_target (not pull_request): always runs the version of this file from the BASE
+  # branch. With pull_request, a PR into staging could edit this workflow to disable the guard and
+  # come out green. Safe because the job never checks out or executes PR code, and refs are passed
+  # through env instead of interpolated into the script (no injection via branch names).
+  pull_request_target:
+    types: [opened, reopened, synchronize, edited]
+    branches: [<production-branch>, <staging-branch>, <integration-branch>]
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch policy
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          case "$BASE_REF" in
+            "<production-branch>")
+              echo "::error::'<production-branch>' accepts no PRs. It only advances by fast-forward via the promote workflow. See docs/branching-and-releases.md."
+              exit 1
+              ;;
+            "<staging-branch>")
+              case "$HEAD_REF" in
+                release/v*) echo "OK: PR into <staging-branch> from '$HEAD_REF'." ;;
+                *)
+                  echo "::error::'<staging-branch>' only accepts PRs from release/vX.Y.Z branches created by the prepare-release workflow. This PR comes from '$HEAD_REF'."
+                  exit 1
+                  ;;
+              esac
+              ;;
+            *) echo "OK: '$BASE_REF' has no restriction." ;;
+          esac
