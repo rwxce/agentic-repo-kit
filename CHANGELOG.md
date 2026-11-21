@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- CI workflow (`ci.yml`): template tests, the kit's guard tests and the skill lint on every pull request and push to `dev`.
+
 ## 0.5.0 — 2026-11-21
 
 First release on the new branch model: `dev` holds every commit, `main` one commit per release.
