@@ -205,7 +205,7 @@ Planning is a conversation, not a document followed by a "go". Until the decisio
 
 `interview-me` (one question at a time) clarifies intent before the plan. Step 11 (up to 4 per
 round) collects operational questions before the "go". Mid-discussion, ask the fewest questions
-that unblock the next decision.
+that unblock the next decision. Where the question tool doesn't exist, ask in plain text.
 
 ## Plan folder, subplans and consolidation
 

@@ -1,0 +1,20 @@
+# WHAT: Supply-chain gate at install time. pnpm refuses to install a version published less than
+#   minimumReleaseAge minutes ago, for every install: humans, agents, CI. Merge into the repo's
+#   pnpm-workspace.yaml (single-package repos have one too).
+# REPO SIGNAL: pnpm (>= 10.16) and agents that run installs. npm/yarn have no exact equivalent:
+#   rely on exact pins plus the Renovate age gate there.
+# CONFIGURE: the age (minutes) equal to Renovate's minimumReleaseAge (renovate.json5);
+#   automations/check-release-age.mjs fails CI when the two drift. Security overrides of transitive
+#   dependencies go under `overrides`, always an exact version published at least this long ago,
+#   with one comment per override saying why (and when it can go).
+
+# 5 days. A compromised release is usually detected and pulled within that window.
+minimumReleaseAge: 7200
+
+# Packages that may run install scripts. Everything else is blocked; list only what needs a native
+# build or a binary download, and say why.
+# allowBuilds:
+#   <native-package>: true
+
+# overrides:
+#   '<transitive-package>': <exact patched version>   # <advisory id>, reached via <parent>
