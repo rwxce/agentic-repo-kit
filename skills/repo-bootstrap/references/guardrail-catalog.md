@@ -40,6 +40,7 @@ Every hook ships with tests; hooks run in CI tests like any other code.
 | Registry ↔ filesystem | registered routes/paths pointing nowhere | central routes/paths file | `arch-tests/route-registry-exists.test.ts` |
 | Content ↔ assets | posts/demos referencing missing images, feeds missing entries | content collections | `arch-tests/content-assets-exist.test.ts` |
 | Unique codes | duplicate error/event codes across groups | error-code or event catalogs | `arch-tests/unique-codes.test.ts` |
+| UI surfaces inventory | a new page or overlay missing from the inventory (responsive reviews start incomplete), or rows citing deleted files | many pages and overlays; responsive bugs on unchecked sizes | `arch-tests/ui-surfaces-inventory.mjs` + `registries/ui-surfaces.md` |
 | i18n key parity | locales drifting from the source locale | >1 locale | `arch-tests/i18n-parity.mjs` |
 | Job-leak guard (test setup) | a test leaving scheduled jobs pending, hidden by global fake timers or surfacing later as a flake in an unrelated file | in-memory test backends with a scheduler or queue; flakes that move between files | `test-guards/job-leak-guard.mjs` |
 | Review-routing policy | sensitive paths reviewed in the light lane; unknown authors passing | review lanes | `ci/review-routing/` |
@@ -112,6 +113,7 @@ Template: `rulesync/permissions.jsonc`.
 | `blueprint.md` (inventory of agents, skills, hooks, lint, CI, test kinds; updated in the same PR) | everyone | `registries/blueprint.md` |
 | `environment-variables.md` (every var, where consumed, per environment) | env-docs hook | `registries/environment-variables.md` |
 | `use-case-matrix.md` (state axes, transitions, named product rules; review findings are checked against the rules) | plan-feature, pr-triage, reviewers | `registries/use-case-matrix.md` |
+| `ui-surfaces.md` (every page and overlay, behaviour per breakpoint, last verified; guarded by `arch-tests/ui-surfaces-inventory.mjs`) | UI implementer, reviewers, width sweeps | `registries/ui-surfaces.md` |
 | Compliance inventory (data, vendors, retention vs published legal texts) | compliance check | write per project |
 
 ## 8. Planning and review protocol

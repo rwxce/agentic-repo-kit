@@ -28,6 +28,8 @@ Templates brought up to date with the reference repo they were distilled from.
 - `ci/mark-ready-contracts.mjs` (+ test): after the production migrations finish, labels each open
   "Contract: <name>" issue whose migration succeeded `contract-ready` and comments once,
   completing gate -> issue -> ready.
+- `arch-tests/ui-surfaces-inventory.mjs` (+ test) and `registries/ui-surfaces.md`: every page and
+  floating surface must be cited in the UI inventory, and the inventory may not cite deleted files.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;
