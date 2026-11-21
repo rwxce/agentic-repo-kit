@@ -126,3 +126,4 @@ Template: `rulesync/permissions.jsonc`.
 | Per-step validation by use case (happy, failure, legacy data) | a step built on an earlier one that was never checked; everything found broken at the end | any implementation | `rules/root.md` |
 | Findings recap at the end of every progress message | findings and pending decisions buried in earlier messages of a long run | loops, multi-step runs | `rules/root.md` |
 | Third-party quarantine (read in `.context/quarantine/`, install is an `ask`) | a skill, MCP or repo installed with hooks or scripts nobody read | any third-party install | `rules/root.md`, `rulesync/permissions.jsonc` |
+| Reflect escalates to a check (ladder, class-level on the second repeat, red first, shrink-only baseline, expiring exceptions, prune mode) | a correction written as prose that the next session ignores again | any repo with custom checks | `skills/reflect/`, `skills/reflect/references/checks.md` |

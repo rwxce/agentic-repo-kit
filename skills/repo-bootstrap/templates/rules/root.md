@@ -287,8 +287,9 @@ use helpers that do not exist.
 ## Corrections
 
 When the user corrects you, fix it first, then apply the `reflect` skill in the same turn: it
-checks whether the correction repeats or states a standing preference and proposes a rule in
-`.rulesync/` (or the repo's rules home) or a memory, written only after a yes.
+checks whether the correction repeats or states a standing preference and proposes a check
+(type, lint rule, test, CI gate) first, else a rule in `.rulesync/` (or the repo's rules home) or a
+memory, written only after a yes.
 <!-- optional: "A hook (`<path>`) flags corrections" if the tool supports prompt hooks -->
 
 ## Codebase navigation
