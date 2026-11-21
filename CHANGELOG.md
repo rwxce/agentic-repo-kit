@@ -20,6 +20,9 @@ Templates brought up to date with the reference repo they were distilled from.
 - `lint/lint-restrictions.lint.test.mjs`: guard test that lints snippets through the repo's real
   ESLint config and fails when a restriction stops firing (a later block replaced the list, an
   `ignores` glob exempted a path) or fires where it must stay allowed.
+- `test-guards/job-leak-guard.mjs` (+ test): test-setup safety net that fails the test leaving
+  scheduled jobs pending, instead of hiding the leak under global fake timers or letting it flake
+  an unrelated file later.
 
 ### Changed
 - `review-seal`: `fingerprint` saves the exact diff to review and prints its fingerprint;

@@ -112,7 +112,7 @@ Nothing gets proposed without a signal in your repo that justifies it.
 | Skills | `plan-feature` (size → consumer sweep → docs first → evidence gate → registry → invariants; plan folders, diagram/method pickers) · `verify-integration` (per-service recipes, evidence-stamped final message) · `reflect` (corrections become checks first, rules last; ratchet, expiring exceptions, prune mode) · `debugging` (hazard search, mitigation ≠ root cause) · `pr-review` (independent vs self-check + seal) · `pr-scope` (freeze scope, route findings to follow-ups) · `interview-me` |
 | Commands | `pr-triage` (each review comment: in scope or deferred) |
 | Hooks | outward-writes blocker (fail-closed) · protected-branch guard · dangerous-command gate with preview · feature-intent router · correction capture · session status · session hand off (save/load) · index reminder and refresh · lint if changed · env-docs parity · compliance tripwire · branch policy · PR preflight (+ independent-review seal notice) · Unicode firewall (machine-wide) |
-| Architecture tests | directory ↔ registry parity · registry ↔ filesystem · content ↔ assets · unique codes · i18n parity |
+| Architecture tests | directory ↔ registry parity · registry ↔ filesystem · content ↔ assets · unique codes · i18n parity · job-leak guard |
 | Custom lint | layer boundaries · no cycles · SDK gateways (+ a test that they still fire) · native deps confined to one runtime · required colocated tests · catch must report · house wrappers |
 | CI | AI-config sync check · lint/typecheck/tests · real deploy artifact · parity checks · PR preflight · branch-policy guard · migration contract gate · contract issue on merge · plan-folder gate and stale check · post-deploy smoke · review routing |
 | Automations | workspace setup (deps, codegen, code index) · release promotion · contract issues · vendored-skill version check · skill lint · skill-routing pack · dependency-family check |
@@ -142,7 +142,7 @@ skills/repo-bootstrap/
   references/              loaded on demand: options menu, discovery lenses, code style,
                            benchmark, decision matrix, guardrail catalog, MCP discovery, rulesync
   templates/               rules, agents, skills, commands, registries, hooks (+ tests),
-                           arch tests, lint, CI, automations
+                           arch tests, test guards, lint, CI, automations
 ```
 
 ## Developing

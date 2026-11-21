@@ -41,6 +41,7 @@ Every hook ships with tests; hooks run in CI tests like any other code.
 | Content ↔ assets | posts/demos referencing missing images, feeds missing entries | content collections | `arch-tests/content-assets-exist.test.ts` |
 | Unique codes | duplicate error/event codes across groups | error-code or event catalogs | `arch-tests/unique-codes.test.ts` |
 | i18n key parity | locales drifting from the source locale | >1 locale | `arch-tests/i18n-parity.mjs` |
+| Job-leak guard (test setup) | a test leaving scheduled jobs pending, hidden by global fake timers or surfacing later as a flake in an unrelated file | in-memory test backends with a scheduler or queue; flakes that move between files | `test-guards/job-leak-guard.mjs` |
 | Review-routing policy | sensitive paths reviewed in the light lane; unknown authors passing | review lanes | `ci/review-routing/` |
 
 ## 3. Custom lint
